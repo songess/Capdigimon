@@ -1,0 +1,51 @@
+// Mock data for categories with subcategories
+const mockCategories = [
+    { 
+        id: '1', 
+        name: '기술', 
+        description: '최신 기술 동향 및 혁신',
+        subcategories: [
+            { id: '1-1', name: '인공지능', description: '인공지능 기술 및 응용' },
+            { id: '1-2', name: 'ML', description: '머신러닝 기술 및 응용' },
+            { id: '1-3', name: '개발', description: '소프트웨어 개발 및 프로그래밍' },
+            { id: '1-4', name: '클라우드', description: '클라우드 컴퓨팅 및 서비스' }
+        ]
+    },
+    { 
+        id: '2', 
+        name: '금융', 
+        description: '금융 시장 및 서비스 동향',
+        subcategories: [
+            { id: '2-1', name: '핀테크', description: '금융 기술 혁신' },
+            { id: '2-2', name: '투자', description: '투자 및 자산 관리' },
+            { id: '2-3', name: '은행', description: '은행 및 금융 서비스' }
+        ]
+    },
+    { 
+        id: '3', 
+        name: '통신', 
+        description: '통신 기술 및 서비스 동향',
+        subcategories: [
+            { id: '3-1', name: '5G', description: '5G 기술 및 서비스' },
+            { id: '3-2', name: '네트워크', description: '네트워크 인프라 및 기술' }
+        ]
+    },
+    { 
+        id: '4', 
+        name: '에너지', 
+        description: '에너지 산업 및 기술 동향',
+        subcategories: [
+            { id: '4-1', name: '신재생', description: '신재생 에너지 기술' },
+            { id: '4-2', name: '전기차', description: '전기차 및 배터리 기술' }
+        ]
+    },
+    { 
+        id: '5', 
+        name: '의료', 
+        description: '의료 기술 및 서비스 동향',
+        subcategories: [
+            { id: '5-1', name: '디지털헬스', description: '디지털 헬스케어 기술' },
+            { id: '5-2', name: '바이오', description: '바이오 기술 및 연구' }
+        ]
+    }
+];

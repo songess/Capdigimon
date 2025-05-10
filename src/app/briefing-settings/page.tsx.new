@@ -1,0 +1,268 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Category, SubCategory } from '@/types/type';
+import { fetchCategories } from '@/app/api/newsApi';
+import { Check, ChevronRight, ChevronDown, Mail, MessageSquare, Bell } from 'lucide-react';
+import toast from 'react-hot-toast';
+
+export default function BriefingSettings() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [emailNotification, setEmailNotification] = useState<boolean>(true);
+  const [kakaoNotification, setKakaoNotification] = useState<boolean>(false);
+  const [slackNotification, setSlackNotification] = useState<boolean>(false);
+  const [briefingFrequency, setBriefingFrequency] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  const [email, setEmail] = useState<string>('user@example.com');
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categoriesData = await fetchCategories();
+        setCategories(categoriesData);
+        // 기본적으로 몇 개의 카테고리 선택
+        setSelectedCategories(['기술']);
+        setSelectedSubCategories(['인공지능', 'ML']);
+      } catch (error) {
+        console.error('카테고리 로드 중 오류 발생:', error);
+        toast.error('카테고리 로드 중 오류가 발생했습니다.');
+      }
+    };
+
+    loadCategories();
+  }, []);
+
+  const handleCategoryToggle = (categoryName: string) => {
+    if (expandedCategory === categoryName) {
+      setExpandedCategory(null);
+    } else {
+      setExpandedCategory(categoryName);
+    }
+
+    if (!selectedCategories.includes(categoryName)) {
+      setSelectedCategories([...selectedCategories, categoryName]);
+      toast.success(`${categoryName} 카테고리가 추가되었습니다.`, { duration: 2000, position: 'bottom-center' });
+    }
+  };
+
+  const handleSubCategoryToggle = (subCategoryName: string) => {
+    if (selectedSubCategories.includes(subCategoryName)) {
+      setSelectedSubCategories(selectedSubCategories.filter(cat => cat !== subCategoryName));
+      toast.success(`${subCategoryName} 서브 카테고리가 제거되었습니다.`, { duration: 2000, position: 'bottom-center' });
+    } else {
+      setSelectedSubCategories([...selectedSubCategories, subCategoryName]);
+      toast.success(`${subCategoryName} 서브 카테고리가 추가되었습니다.`, { duration: 2000, position: 'bottom-center' });
+    }
+  };
+
+  const handleSaveSettings = () => {
+    // 실제로는 API를 통해 서버에 저장
+    toast.success('설정이 저장되었습니다.', {
+      icon: '👍',
+      duration: 3000,
+      style: {
+        borderRadius: '10px',
+        background: '#333',
+        color: '#fff',
+      },
+    });
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">맞춤형 브리핑 설정</h1>
+        <p className="text-gray-600 mt-2">관심 있는 산업 분야를 설정하고 알림 방식을 선택하세요.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="space-y-8">
+          {/* 관심 카테고리 설정 */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-4">관심 산업 설정</h2>
+            <p className="text-gray-600 mb-4">관심 있는 산업 분야와 세부 카테고리를 선택하세요.</p>
+            
+            <div className="space-y-4">
+              {categories.map((category) => (
+                <div key={category.id} className="border rounded-md overflow-hidden">
+                  <div 
+                    className={`flex items-center p-4 cursor-pointer ${
+                      selectedCategories.includes(category.name)
+                        ? 'bg-blue-50 border-blue-500'
+                        : 'bg-white hover:bg-gray-50'
+                    }`}
+                    onClick={() => handleCategoryToggle(category.name)}
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium">{category.name}</div>
+                      <div className="text-xs text-gray-500">{category.description}</div>
+                    </div>
+                    <div className="flex items-center">
+                      {selectedCategories.includes(category.name) && (
+                        <Check className="h-5 w-5 text-blue-500 mr-2" />
+                      )}
+                      {expandedCategory === category.name ? (
+                        <ChevronDown className="h-5 w-5 text-gray-500" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5 text-gray-500" />
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* 서브 카테고리 */}
+                  {expandedCategory === category.name && category.subcategories && (
+                    <div className="bg-gray-50 p-3 pl-8 border-t">
+                      <div className="grid grid-cols-2 gap-2">
+                        {category.subcategories.map((subCategory) => (
+                          <div 
+                            key={subCategory.id}
+                            className={`flex items-center p-2 rounded-md cursor-pointer border ${
+                              selectedSubCategories.includes(subCategory.name)
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            onClick={() => handleSubCategoryToggle(subCategory.name)}
+                          >
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">{subCategory.name}</div>
+                              <div className="text-xs text-gray-500">{subCategory.description}</div>
+                            </div>
+                            {selectedSubCategories.includes(subCategory.name) && (
+                              <Check className="h-4 w-4 text-blue-500" />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-8">
+          {/* 알림 설정 */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-4">알림 설정</h2>
+            <p className="text-gray-600 mb-4">브리핑을 받을 방법을 선택하세요.</p>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Mail className="h-5 w-5 text-gray-500 mr-2" />
+                  <span>이메일 알림</span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer"
+                    checked={emailNotification}
+                    onChange={() => setEmailNotification(!emailNotification)}
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              
+              {emailNotification && (
+                <div className="ml-7">
+                  <input
+                    type="email"
+                    placeholder="이메일 주소"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+              )}
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <MessageSquare className="h-5 w-5 text-gray-500 mr-2" />
+                  <span>카카오톡 알림</span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer"
+                    checked={kakaoNotification}
+                    onChange={() => setKakaoNotification(!kakaoNotification)}
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Bell className="h-5 w-5 text-gray-500 mr-2" />
+                  <span>Slack 알림</span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer"
+                    checked={slackNotification}
+                    onChange={() => setSlackNotification(!slackNotification)}
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* 브리핑 주기 설정 */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-4">브리핑 주기 설정</h2>
+            <p className="text-gray-600 mb-4">브리핑을 받을 주기를 선택하세요.</p>
+            
+            <div className="grid grid-cols-3 gap-3">
+              <div 
+                className={`flex items-center justify-center p-3 rounded-md cursor-pointer border ${
+                  briefingFrequency === 'daily'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => setBriefingFrequency('daily')}
+              >
+                <span className="font-medium">매일</span>
+              </div>
+              <div 
+                className={`flex items-center justify-center p-3 rounded-md cursor-pointer border ${
+                  briefingFrequency === 'weekly'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => setBriefingFrequency('weekly')}
+              >
+                <span className="font-medium">주간</span>
+              </div>
+              <div 
+                className={`flex items-center justify-center p-3 rounded-md cursor-pointer border ${
+                  briefingFrequency === 'monthly'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => setBriefingFrequency('monthly')}
+              >
+                <span className="font-medium">월간</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 저장 버튼 */}
+          <div className="flex justify-end">
+            <Button
+              className="px-6 py-6 text-base"
+              onClick={handleSaveSettings}
+            >
+              설정 저장
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
