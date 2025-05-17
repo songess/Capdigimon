@@ -1,23 +1,36 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { News, Paper, Category, TrendData } from '@/types/type';
+import { NewsPaper, Category, TrendData } from '@/types/type';
 import { fetchNews, fetchPapers, fetchCategories, fetchTrends } from '@/app/api/newsApi';
 import { fetchSubCategoryTrends, fetchSubCategoryTrendsByCategory } from '@/app/api/subCategoryTrends';
-import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
-  ResponsiveContainer, AreaChart, Area, BarChart, Bar,
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
 } from 'recharts';
-import { 
-  Newspaper, BookOpen, TrendingUp, BarChart2, Activity
-} from 'lucide-react';
-import Link from 'next/link';
+import { Newspaper, BookOpen, TrendingUp, BarChart2, Activity } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+
+interface NewsPaperWithCategory extends NewsPaper {
+  category: string[];
+}
 
 export default function Dashboard() {
-  const [news, setNews] = useState<News[]>([]);
-  const [papers, setPapers] = useState<Paper[]>([]);
+  const [news, setNews] = useState<NewsPaperWithCategory[]>([]);
+  console.log('news', news);
+  const [papers, setPapers] = useState<NewsPaperWithCategory[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [trends, setTrends] = useState<TrendData[]>([]);
   const [subCategoryTrends, setSubCategoryTrends] = useState<TrendData[]>([]);
@@ -32,25 +45,43 @@ export default function Dashboard() {
     // 데이터 로드
     const loadData = async () => {
       try {
-        const newsData = await fetchNews(selectedCategory, searchKeyword);
-        const papersData = await fetchPapers(selectedCategory, searchKeyword);
+        const newsData = await fetchNews();
+        console.log('newsData response:', newsData);
+        const papersData = await fetchPapers();
+        console.log('papersData response:', papersData);
         const categoriesData = await fetchCategories();
         const trendsData = await fetchTrends();
         const subCategoryTrendsData = await fetchSubCategoryTrends();
 
-        setNews(newsData);
-        setPapers(papersData);
+        setNews(
+          newsData.map((response, idx) => {
+            console.log('response:', response);
+            return {
+              ...response.newspaper,
+              category: response.categories || [],
+            };
+          }) as NewsPaperWithCategory[],
+        );
+        setPapers(
+          papersData.map((response) => {
+            console.log('response:', response);
+            return {
+              ...response.newspaper,
+              category: response.categories || [],
+            };
+          }) as NewsPaperWithCategory[],
+        );
         setCategories(categoriesData);
         setTrends(trendsData);
         setSubCategoryTrends(subCategoryTrendsData);
-        
+
         // 검색 결과에 대한 토스트 알림
         if (selectedCategory || searchKeyword) {
           const totalResults = activeTab === 'news' ? newsData.length : papersData.length;
-          toast.success(
-            `${totalResults}개의 ${activeTab === 'news' ? '뉴스' : '논문'}를 찾았습니다.`,
-            { duration: 2000, position: 'bottom-center' }
-          );
+          toast.success(`${totalResults}개의 ${activeTab === 'news' ? '뉴스' : '논문'}를 찾았습니다.`, {
+            duration: 2000,
+            position: 'bottom-center',
+          });
         }
       } catch (error) {
         console.error('데이터 로드 중 오류 발생:', error);
@@ -72,7 +103,7 @@ export default function Dashboard() {
           console.error('서브 카테고리 트렌드 데이터 로드 중 오류 발생:', error);
         }
       };
-      
+
       loadSubCategoryTrends();
     }
   }, [showSubCategoryTrend, selectedTrendCategory]);
@@ -80,13 +111,13 @@ export default function Dashboard() {
   // 트렌드 데이터 변환
   const getChartData = () => {
     const sourceData = showSubCategoryTrend ? subCategoryTrends : trends;
-    
-    return sourceData.reduce((acc: Array<{date: string, [key: string]: number | string}>, curr) => {
-      const existingDate = acc.find(item => item.date === curr.date);
+
+    return sourceData.reduce((acc: Array<{ date: string; [key: string]: number | string }>, curr) => {
+      const existingDate = acc.find((item) => item.date === curr.date);
       if (existingDate) {
         existingDate[curr.keyword] = curr.count;
       } else {
-        const newItem: {date: string, [key: string]: number | string} = { date: curr.date };
+        const newItem: { date: string; [key: string]: number | string } = { date: curr.date };
         newItem[curr.keyword] = curr.count;
         acc.push(newItem);
       }
@@ -99,7 +130,7 @@ export default function Dashboard() {
   // 키워드 목록 추출
   const getKeywordList = () => {
     const sourceData = showSubCategoryTrend ? subCategoryTrends : trends;
-    return [...new Set(sourceData.map(trend => trend.keyword))];
+    return [...new Set(sourceData.map((trend) => trend.keyword))];
   };
 
   const keywordList = getKeywordList();
@@ -107,8 +138,16 @@ export default function Dashboard() {
   // 차트 색상 생성 함수
   const getChartColor = (index: number) => {
     const colors = [
-      '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088fe',
-      '#00c49f', '#ffbb28', '#ff8042', '#a4de6c', '#d0ed57'
+      '#8884d8',
+      '#82ca9d',
+      '#ffc658',
+      '#ff8042',
+      '#0088fe',
+      '#00c49f',
+      '#ffbb28',
+      '#ff8042',
+      '#a4de6c',
+      '#d0ed57',
     ];
     return colors[index % colors.length];
   };
@@ -116,7 +155,7 @@ export default function Dashboard() {
   // 그라데이션 정의
   const gradients = keywordList.map((keyword, index) => ({
     id: `color${index}`,
-    color: getChartColor(index)
+    color: getChartColor(index),
   }));
 
   // 차트 렌더링 함수
@@ -126,27 +165,17 @@ export default function Dashboard() {
         return (
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f5" />
-            <XAxis 
-              dataKey="date" 
-              tick={{ fill: '#666' }} 
-              axisLine={{ stroke: '#ccc' }} 
-            />
-            <YAxis 
-              tick={{ fill: '#666' }} 
-              axisLine={{ stroke: '#ccc' }} 
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+            <XAxis dataKey="date" tick={{ fill: '#666' }} axisLine={{ stroke: '#ccc' }} />
+            <YAxis tick={{ fill: '#666' }} axisLine={{ stroke: '#ccc' }} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 borderRadius: '8px',
                 boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-                border: 'none'
-              }} 
+                border: 'none',
+              }}
             />
-            <Legend 
-              wrapperStyle={{ paddingTop: '10px' }} 
-              iconType="circle" 
-            />
+            <Legend wrapperStyle={{ paddingTop: '10px' }} iconType="circle" />
             {keywordList.map((keyword, index) => (
               <Line
                 key={keyword}
@@ -160,40 +189,30 @@ export default function Dashboard() {
             ))}
           </LineChart>
         );
-      
+
       case 'area':
         return (
           <AreaChart data={chartData}>
             <defs>
               {gradients.map((gradient) => (
                 <linearGradient key={gradient.id} id={gradient.id} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={gradient.color} stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor={gradient.color} stopOpacity={0.1}/>
+                  <stop offset="5%" stopColor={gradient.color} stopOpacity={0.8} />
+                  <stop offset="95%" stopColor={gradient.color} stopOpacity={0.1} />
                 </linearGradient>
               ))}
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f5" />
-            <XAxis 
-              dataKey="date" 
-              tick={{ fill: '#666' }} 
-              axisLine={{ stroke: '#ccc' }} 
-            />
-            <YAxis 
-              tick={{ fill: '#666' }} 
-              axisLine={{ stroke: '#ccc' }} 
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+            <XAxis dataKey="date" tick={{ fill: '#666' }} axisLine={{ stroke: '#ccc' }} />
+            <YAxis tick={{ fill: '#666' }} axisLine={{ stroke: '#ccc' }} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 borderRadius: '8px',
                 boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-                border: 'none'
-              }} 
+                border: 'none',
+              }}
             />
-            <Legend 
-              wrapperStyle={{ paddingTop: '10px' }} 
-              iconType="circle" 
-            />
+            <Legend wrapperStyle={{ paddingTop: '10px' }} iconType="circle" />
             {keywordList.map((keyword, index) => (
               <Area
                 key={keyword}
@@ -206,46 +225,64 @@ export default function Dashboard() {
             ))}
           </AreaChart>
         );
-      
+
       case 'bar':
         return (
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f5" />
-            <XAxis 
-              dataKey="date" 
-              tick={{ fill: '#666' }} 
-              axisLine={{ stroke: '#ccc' }} 
-            />
-            <YAxis 
-              tick={{ fill: '#666' }} 
-              axisLine={{ stroke: '#ccc' }} 
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+            <XAxis dataKey="date" tick={{ fill: '#666' }} axisLine={{ stroke: '#ccc' }} />
+            <YAxis tick={{ fill: '#666' }} axisLine={{ stroke: '#ccc' }} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 borderRadius: '8px',
                 boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-                border: 'none'
-              }} 
+                border: 'none',
+              }}
             />
-            <Legend 
-              wrapperStyle={{ paddingTop: '10px' }} 
-              iconType="circle" 
-            />
+            <Legend wrapperStyle={{ paddingTop: '10px' }} iconType="circle" />
             {keywordList.map((keyword, index) => (
-              <Bar
-                key={keyword}
-                dataKey={keyword}
-                fill={getChartColor(index)}
-                radius={[4, 4, 0, 0]}
-              />
+              <Bar key={keyword} dataKey={keyword} fill={getChartColor(index)} radius={[4, 4, 0, 0]} />
             ))}
           </BarChart>
         );
-      
+
       default:
         return null;
     }
+  };
+
+  // 뉴스/논문 카드 렌더링
+  const renderNewsPaperCard = (item: NewsPaperWithCategory) => {
+    return (
+      <Link href={`/news-detail?id=${item.id}`} key={item.title}>
+        <div key={item.title} className="bg-white rounded-lg shadow-md p-6 mb-4 hover:bg-gray-50">
+          <div className="mb-4">
+            <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+              {item.category ? item.category.join(', ') : '미분류'}
+            </span>
+            <span className="text-sm text-gray-500 ml-2">
+              {item.source} | {item.date}
+            </span>
+          </div>
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="text-xl font-semibold text-gray-800">{item.title}</h3>
+          </div>
+          <p className="text-gray-600 mb-4">{item.summary}</p>
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-500">
+              <span className="font-medium">{item.source}</span>
+              {item.type === 'paper' && <span className="ml-2">- {item.author}</span>}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" size="sm">
+                자세히 보기
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
   };
 
   return (
@@ -286,9 +323,7 @@ export default function Dashboard() {
           <div className="flex border-b border-gray-200">
             <button
               className={`py-2 px-4 font-medium ${
-                activeTab === 'news'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                activeTab === 'news' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'
               }`}
               onClick={() => setActiveTab('news')}
             >
@@ -316,36 +351,7 @@ export default function Dashboard() {
           {activeTab === 'news' && (
             <div className="space-y-6">
               {news.length > 0 ? (
-                news.map((item) => (
-                  <div key={item.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col">
-                      <div className="mb-4">
-                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                          {item.category}
-                        </span>
-                        <span className="text-sm text-gray-500 ml-2">
-                          {item.source} | {item.publishedAt}
-                        </span>
-                      </div>
-                      <h2 className="text-xl font-semibold text-gray-900 mb-2">{item.title}</h2>
-                      <p className="text-gray-600 mb-4">{item.description}</p>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {item.keywords.map((keyword, index) => (
-                          <span key={index} className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                            {keyword}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex justify-end">
-                        <Link href={`/news-detail?id=${item.id}`}>
-                          <Button variant="outline" size="sm">
-                            자세히 보기
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))
+                news.map(renderNewsPaperCard)
               ) : (
                 <div className="bg-white p-6 rounded-lg shadow-md text-center">
                   <p className="text-gray-500">검색 결과가 없습니다.</p>
@@ -358,39 +364,7 @@ export default function Dashboard() {
           {activeTab === 'papers' && (
             <div className="space-y-6">
               {papers.length > 0 ? (
-                papers.map((item) => (
-                  <div key={item.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col">
-                      <div className="mb-4">
-                        <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                          {item.category}
-                        </span>
-                        <span className="text-sm text-gray-500 ml-2">
-                          {item.publishedAt}
-                        </span>
-                      </div>
-                      <h2 className="text-xl font-semibold text-gray-900 mb-2">{item.title}</h2>
-                      <p className="text-sm text-gray-700 mb-2">
-                        <span className="font-medium">저자:</span> {item.authors.join(', ')}
-                      </p>
-                      <p className="text-gray-600 mb-4">{item.abstract}</p>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {item.keywords.map((keyword, index) => (
-                          <span key={index} className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                            {keyword}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex justify-end">
-                        <Link href={`/news-detail?id=${item.id}&type=paper`}>
-                          <Button variant="outline" size="sm">
-                            자세히 보기
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))
+                papers.map(renderNewsPaperCard)
               ) : (
                 <div className="bg-white p-6 rounded-lg shadow-md text-center">
                   <p className="text-gray-500">검색 결과가 없습니다.</p>
@@ -413,9 +387,7 @@ export default function Dashboard() {
                 <div className="flex items-center bg-gray-100 rounded-full p-1">
                   <button
                     className={`flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                      !showSubCategoryTrend 
-                        ? 'bg-white text-blue-600 shadow-sm' 
-                        : 'text-gray-600'
+                      !showSubCategoryTrend ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
                     } transition-all duration-200`}
                     onClick={() => setShowSubCategoryTrend(false)}
                   >
@@ -423,9 +395,7 @@ export default function Dashboard() {
                   </button>
                   <button
                     className={`flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                      showSubCategoryTrend 
-                        ? 'bg-white text-blue-600 shadow-sm' 
-                        : 'text-gray-600'
+                      showSubCategoryTrend ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
                     } transition-all duration-200`}
                     onClick={() => setShowSubCategoryTrend(true)}
                   >
@@ -438,22 +408,27 @@ export default function Dashboard() {
                   </button>
                   <div className="absolute right-0 w-48 bg-white rounded-md shadow-lg overflow-hidden z-20 hidden group-hover:block">
                     <div className="py-1">
-                      <button 
-                        className={`flex items-center px-4 py-2 text-sm w-full text-left ${chartType === 'area' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-100'}`}
+                      <button
+                        className={`flex items-center px-4 py-2 text-sm w-full text-left ${
+                          chartType === 'area' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-100'
+                        }`}
                         onClick={() => setChartType('area')}
                       >
                         <Activity className="h-4 w-4 mr-2" />
                         영역 차트
                       </button>
-                      <button 
-                        className={`flex items-center px-4 py-2 text-sm w-full text-left ${chartType === 'line' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-100'}`}
+                      <button
+                        className={`flex items-center px-4 py-2 text-sm w-full text-left ${
+                          chartType === 'line' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-100'
+                        }`}
                         onClick={() => setChartType('line')}
                       >
-                        <TrendingUp className="h-4 w-4 mr-2" />
-                        선 차트
+                        <TrendingUp className="h-4 w-4 mr-2" />선 차트
                       </button>
-                      <button 
-                        className={`flex items-center px-4 py-2 text-sm w-full text-left ${chartType === 'bar' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-100'}`}
+                      <button
+                        className={`flex items-center px-4 py-2 text-sm w-full text-left ${
+                          chartType === 'bar' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-100'
+                        }`}
                         onClick={() => setChartType('bar')}
                       >
                         <BarChart2 className="h-4 w-4 mr-2" />
@@ -464,7 +439,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            
+
             {showSubCategoryTrend && (
               <div className="mb-4">
                 <select
@@ -481,10 +456,12 @@ export default function Dashboard() {
                 </select>
               </div>
             )}
-            
+
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                {renderChart() || <div className="h-full w-full flex items-center justify-center">No data available</div>}
+                {renderChart() || (
+                  <div className="h-full w-full flex items-center justify-center">No data available</div>
+                )}
               </ResponsiveContainer>
             </div>
           </div>
@@ -495,7 +472,9 @@ export default function Dashboard() {
             <div className="space-y-4">
               <div className="border-l-4 border-blue-500 pl-4 py-2">
                 <h3 className="font-medium text-gray-900">기술 산업</h3>
-                <p className="text-sm text-gray-600">인공지능 기술의 발전으로 자동화 시스템이 급속도로 확산되고 있습니다.</p>
+                <p className="text-sm text-gray-600">
+                  인공지능 기술의 발전으로 자동화 시스템이 급속도로 확산되고 있습니다.
+                </p>
               </div>
               <div className="border-l-4 border-green-500 pl-4 py-2">
                 <h3 className="font-medium text-gray-900">금융 산업</h3>
@@ -503,7 +482,9 @@ export default function Dashboard() {
               </div>
               <div className="border-l-4 border-purple-500 pl-4 py-2">
                 <h3 className="font-medium text-gray-900">의료 산업</h3>
-                <p className="text-sm text-gray-600">바이오 기술의 혁신으로 개인 맞춤형 의료 서비스가 확대되고 있습니다.</p>
+                <p className="text-sm text-gray-600">
+                  바이오 기술의 혁신으로 개인 맞춤형 의료 서비스가 확대되고 있습니다.
+                </p>
               </div>
             </div>
           </div>
