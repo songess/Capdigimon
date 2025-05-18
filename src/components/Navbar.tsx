@@ -60,10 +60,14 @@ export default function Navbar() {
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            <Button variant="outline" className="mr-2">
-              로그인
-            </Button>
-            <Button>회원가입</Button>
+            <Link href="/auth">
+              <Button variant="outline" className="mr-2">
+                로그인
+              </Button>
+            </Link>
+            <Link href="/auth">
+              <Button>회원가입</Button>
+            </Link>
           </div>
           <div className="-mr-2 flex items-center sm:hidden">
             <button
@@ -81,12 +85,7 @@ export default function Navbar() {
                 stroke="currentColor"
                 aria-hidden="true"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
           </div>
@@ -138,10 +137,14 @@ export default function Navbar() {
         </div>
         <div className="pt-4 pb-3 border-t border-gray-200">
           <div className="flex items-center px-4">
-            <Button variant="outline" className="mr-2">
-              로그인
-            </Button>
-            <Button>회원가입</Button>
+            <Link href="/auth">
+              <Button variant="outline" className="mr-2">
+                로그인
+              </Button>
+            </Link>
+            <Link href="/auth">
+              <Button>회원가입</Button>
+            </Link>
           </div>
         </div>
       </div>

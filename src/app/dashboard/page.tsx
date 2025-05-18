@@ -54,7 +54,7 @@ export default function Dashboard() {
         const subCategoryTrendsData = await fetchSubCategoryTrends();
 
         setNews(
-          newsData.map((response, idx) => {
+          newsData.map((response) => {
             console.log('response:', response);
             return {
               ...response.newspaper,
