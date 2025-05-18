@@ -1,4 +1,4 @@
-  {
+{
   "name": "project-root",
   "version": "0.1.0",
   "private": true,
@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "secure": "node server.js"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.4",
