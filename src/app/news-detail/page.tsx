@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { NewsPaper } from '@/types/type';
-import { fetchNews, fetchPapers } from '@/app/api/newsApi';
+import { fetchAllNews, fetchAllPapers } from '@/app/api/newsApi';
 import { ArrowLeft, ExternalLink, Share2, Bookmark } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -18,7 +18,6 @@ function NewsDetailContent() {
   const type = searchParams.get('type') || 'news';
 
   const [item, setItem] = useState<NewsPaper | null>(null);
-  console.log(item);
   const [relatedItems, setRelatedItems] = useState<NewsPaper[]>([
     {
       id: 1,
@@ -58,7 +57,7 @@ function NewsDetailContent() {
 
         if (type === 'news') {
           // 뉴스 데이터 가져오기
-          const newsData = await fetchNews();
+          const newsData = await fetchAllNews();
           const selectedNews = newsData.find((news) => news.newspaper.id === Number(id));
           if (selectedNews) {
             setItem(selectedNews.newspaper);
@@ -85,7 +84,7 @@ function NewsDetailContent() {
           }
         } else {
           // 논문 데이터 가져오기
-          const papersData = await fetchPapers();
+          const papersData = await fetchAllPapers();
           const selectedPaper = papersData.find((paper) => paper.newspaper.id === Number(id));
           if (selectedPaper) {
             setItem(selectedPaper.newspaper);
