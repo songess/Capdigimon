@@ -18,27 +18,12 @@ export default function AuthPage() {
     e.preventDefault();
     try {
       if (isLogin) {
-        const response = await fetchLogin(email, password);
-        if (response.status === 401) {
-          toast.error('이메일 또는 비밀번호가 올바르지 않습니다.');
-          return;
-        }
-        if (!response.ok) {
-          toast.error('로그인에 실패했습니다. 잠시 후 다시 시도해주세요.');
-          return;
-        }
+        await fetchLogin(email, password);
+
         toast.success('로그인되었습니다.');
         router.push('/dashboard');
       } else {
-        const response = await fetchSignUp(email, password, name);
-        if (response.status === 409) {
-          toast.error('이미 존재하는 이메일입니다.');
-          return;
-        }
-        if (!response.ok) {
-          toast.error('회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.');
-          return;
-        }
+        await fetchSignUp(email, password, name);
         toast.success('회원가입이 완료되었습니다.');
         router.push('/dashboard');
       }
@@ -62,18 +47,22 @@ export default function AuthPage() {
 
         <div className="mt-8 space-y-6">
           <div className="flex justify-center">
-            <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 gap-1">
+            <Tabs
+              defaultValue="login"
+              className="w-full"
+              onValueChange={(value) => {
+                setIsLogin(value === 'login');
+              }}
+            >
+              <TabsList className="grid w-full grid-cols-2 gap-1 bg-white ">
                 <TabsTrigger
                   value="login"
-                  onClick={() => setIsLogin(true)}
                   className="text-lg data-[state=active]:border-gray-200 data-[state=active]:bg-gray-50 transition-colors"
                 >
                   로그인
                 </TabsTrigger>
                 <TabsTrigger
                   value="register"
-                  onClick={() => setIsLogin(false)}
                   className="text-lg data-[state=active]:border-gray-200 data-[state=active]:bg-gray-50 transition-colors"
                 >
                   회원가입
@@ -91,6 +80,7 @@ export default function AuthPage() {
                       value={email}
                       onChange={(e) => handleInputChange(e, setEmail)}
                       required
+                      autoComplete="email"
                       className="w-full px-4 py-3 text-lg bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                       placeholder="example@email.com"
                     />
@@ -105,6 +95,7 @@ export default function AuthPage() {
                       value={password}
                       onChange={(e) => handleInputChange(e, setPassword)}
                       required
+                      autoComplete="current-password"
                       className="w-full px-4 py-3 text-lg bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                       placeholder="••••••••"
                     />
@@ -126,6 +117,7 @@ export default function AuthPage() {
                       value={name}
                       onChange={(e) => handleInputChange(e, setName)}
                       required
+                      autoComplete="name"
                       className="w-full px-4 py-3 text-lg bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                       placeholder="홍길동"
                     />
@@ -140,6 +132,7 @@ export default function AuthPage() {
                       value={email}
                       onChange={(e) => handleInputChange(e, setEmail)}
                       required
+                      autoComplete="email"
                       className="w-full px-4 py-3 text-lg bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                       placeholder="example@email.com"
                     />
@@ -154,6 +147,7 @@ export default function AuthPage() {
                       value={password}
                       onChange={(e) => handleInputChange(e, setPassword)}
                       required
+                      autoComplete="new-password"
                       className="w-full px-4 py-3 text-lg bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                       placeholder="••••••••"
                     />
