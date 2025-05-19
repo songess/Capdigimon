@@ -48,6 +48,7 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
     // 데이터 로드
     const loadData = async () => {
       try {
+        console.log('access_token', access_token);
         const newsData = access_token ? await fetchNews() : await fetchAllNews();
         const papersData = access_token ? await fetchPapers() : await fetchAllPapers();
         const categoriesData = await fetchCategories();
