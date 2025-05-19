@@ -30,17 +30,17 @@ export interface User {
   briefingFrequency: 'daily' | 'weekly' | 'monthly';
 }
 
+export type CategoryEnum = 'COMPUTER_ENGINEERING' | 'ELECTRICAL_ELECTRONIC_ENGINEERING' | 'IT_CATEGORY';
+
 export interface Category {
-  id: string;
+  id: CategoryEnum;
   name: string;
-  description: string;
   subcategories?: SubCategory[];
 }
 
 export interface SubCategory {
   id: string;
   name: string;
-  description: string;
 }
 
 export interface Keyword {

@@ -13,9 +13,13 @@ export default function BriefingSettings() {
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [emailNotification, setEmailNotification] = useState<boolean>(true);
   const [kakaoNotification, setKakaoNotification] = useState<boolean>(false);
-  const [slackNotification, setSlackNotification] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<'news' | 'paper'>('news');
   const [briefingFrequency, setBriefingFrequency] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  const [selectedTime, setSelectedTime] = useState<string>('09:00');
+  const [selectedDays, setSelectedDays] = useState<string>('월');
+  const [selectedDate, setSelectedDate] = useState<number>(1);
   const [email, setEmail] = useState<string>('user@example.com');
+  const [kakao, setKakao] = useState<string>('kakaoid');
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -23,9 +27,9 @@ export default function BriefingSettings() {
         const categoriesData = await fetchCategories();
         setCategories(categoriesData);
         // 기본 선택된 서브 카테고리
-        setSelectedSubCategories(['인공지능', 'ML']);
+        setSelectedSubCategories(['머신러닝', '딥러닝']);
         // 기본 선택된 카테고리 확장
-        setExpandedCategories(['기술']);
+        setExpandedCategories(['ARTIFICIAL_INTELLIGENCE_ROBOTICS']);
       } catch (error) {
         console.error('카테고리 로드 중 오류 발생:', error);
         toast.error('카테고리 로드 중 오류가 발생했습니다.');
@@ -38,16 +42,14 @@ export default function BriefingSettings() {
   // 카테고리에 속한 서브 카테고리 중 하나라도 선택되어 있는지 확인하는 함수
   const hasSelectedSubCategories = (category: Category) => {
     if (!category.subcategories) return false;
-    
-    return category.subcategories.some(subCategory => 
-      selectedSubCategories.includes(subCategory.name)
-    );
+
+    return category.subcategories.some((subCategory) => selectedSubCategories.includes(subCategory.name));
   };
 
   const handleCategoryToggle = (categoryName: string) => {
     // 확장된 카테고리 목록 복사
     const updatedExpandedCategories = [...expandedCategories];
-    
+
     if (expandedCategories.includes(categoryName)) {
       // 이미 확장된 카테고리라면 제거 (닫기)
       const index = updatedExpandedCategories.indexOf(categoryName);
@@ -56,29 +58,32 @@ export default function BriefingSettings() {
       // 확장되지 않은 카테고리라면 추가 (열기)
       updatedExpandedCategories.push(categoryName);
     }
-    
+
     // 서브 카테고리가 선택된 카테고리들은 항상 확장 상태 유지
-    categories.forEach(category => {
+    categories.forEach((category) => {
       if (hasSelectedSubCategories(category) && !updatedExpandedCategories.includes(category.name)) {
         updatedExpandedCategories.push(category.name);
       }
     });
-    
+
     setExpandedCategories(updatedExpandedCategories);
   };
 
   const handleSubCategoryToggle = (subCategoryName: string, categoryName: string) => {
     if (selectedSubCategories.includes(subCategoryName)) {
-      setSelectedSubCategories(selectedSubCategories.filter(cat => cat !== subCategoryName));
-      toast.success(`${subCategoryName} 서브 카테고리가 제거되었습니다.`, { duration: 2000, position: 'bottom-center' });
-      
+      setSelectedSubCategories(selectedSubCategories.filter((cat) => cat !== subCategoryName));
+      toast.success(`${subCategoryName} 서브 카테고리가 제거되었습니다.`, {
+        duration: 2000,
+        position: 'bottom-center',
+      });
+
       // 해당 카테고리의 모든 서브 카테고리가 선택 해제되었는지 확인
-      const category = categories.find(c => c.name === categoryName);
+      const category = categories.find((c) => c.name === categoryName);
       if (category && category.subcategories) {
         const stillHasSelected = category.subcategories.some(
-          subCat => subCat.name !== subCategoryName && selectedSubCategories.includes(subCat.name)
+          (subCat) => subCat.name !== subCategoryName && selectedSubCategories.includes(subCat.name),
         );
-        
+
         // 모든 서브 카테고리가 선택 해제되었다면 확장 상태에서 제거할 수 있음
         if (!stillHasSelected) {
           // 여기서는 자동으로 닫지 않고, 사용자가 직접 닫을 수 있게 함
@@ -86,8 +91,11 @@ export default function BriefingSettings() {
       }
     } else {
       setSelectedSubCategories([...selectedSubCategories, subCategoryName]);
-      toast.success(`${subCategoryName} 서브 카테고리가 추가되었습니다.`, { duration: 2000, position: 'bottom-center' });
-      
+      toast.success(`${subCategoryName} 서브 카테고리가 추가되었습니다.`, {
+        duration: 2000,
+        position: 'bottom-center',
+      });
+
       // 서브 카테고리가 선택되면 해당 카테고리를 자동으로 확장 상태로 유지
       if (!expandedCategories.includes(categoryName)) {
         setExpandedCategories([...expandedCategories, categoryName]);
@@ -108,6 +116,15 @@ export default function BriefingSettings() {
     });
   };
 
+  // 카테고리 필터링 함수
+  const getFilteredCategories = () => {
+    if (selectedTab === 'news') {
+      return categories.filter((category) => category.name === 'IT 기업');
+    } else {
+      return categories.filter((category) => category.name === '컴퓨터 공학' || category.name === '전기/전자 공학');
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -121,14 +138,37 @@ export default function BriefingSettings() {
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4">관심 산업 설정</h2>
             <p className="text-gray-600 mb-4">관심 있는 산업 분야와 세부 카테고리를 선택하세요.</p>
-            
+
+            {/* 뉴스/논문 탭 */}
+            <div className="flex space-x-4 mb-6">
+              <button
+                className={`px-4 py-2 rounded-md transition-all duration-200 ${
+                  selectedTab === 'news' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                onClick={() => setSelectedTab('news')}
+              >
+                뉴스
+              </button>
+              <button
+                className={`px-4 py-2 rounded-md transition-all duration-200 ${
+                  selectedTab === 'paper' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                onClick={() => setSelectedTab('paper')}
+              >
+                논문
+              </button>
+            </div>
+
             <div className="space-y-4">
-              {categories.map((category) => {
+              {getFilteredCategories().map((category) => {
                 const isExpanded = expandedCategories.includes(category.name);
-                
+
                 return (
-                  <div key={category.id} className="rounded-md overflow-hidden shadow-sm hover:shadow transition-shadow duration-200">
-                    <div 
+                  <div
+                    key={category.id}
+                    className="rounded-md overflow-hidden shadow-sm hover:shadow transition-shadow duration-200"
+                  >
+                    <div
                       className={`flex items-center p-4 cursor-pointer bg-white hover:bg-gray-50 transition-colors duration-200`}
                       onClick={() => handleCategoryToggle(category.name)}
                     >
@@ -144,19 +184,17 @@ export default function BriefingSettings() {
                         )}
                       </div>
                     </div>
-                    
+
                     {/* 서브 카테고리 */}
-                    <div 
+                    <div
                       className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        isExpanded 
-                          ? 'max-h-96 opacity-100' 
-                          : 'max-h-0 opacity-0'
+                        isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                       }`}
                     >
                       <div className="bg-gray-50 p-3 pl-8">
                         <div className="grid grid-cols-2 gap-2">
                           {category.subcategories?.map((subCategory) => (
-                            <div 
+                            <div
                               key={subCategory.id}
                               className={`flex items-center p-2 rounded-md cursor-pointer border ${
                                 selectedSubCategories.includes(subCategory.name)
@@ -189,7 +227,7 @@ export default function BriefingSettings() {
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4">알림 설정</h2>
             <p className="text-gray-600 mb-4">브리핑을 받을 방법을 선택하세요.</p>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -197,8 +235,8 @@ export default function BriefingSettings() {
                   <span>이메일 알림</span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     className="sr-only peer"
                     checked={emailNotification}
                     onChange={() => setEmailNotification(!emailNotification)}
@@ -206,7 +244,7 @@ export default function BriefingSettings() {
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
-              
+
               {emailNotification && (
                 <div className="ml-7 transition-all duration-300 ease-in-out">
                   <input
@@ -218,15 +256,15 @@ export default function BriefingSettings() {
                   />
                 </div>
               )}
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <MessageSquare className="h-5 w-5 text-gray-500 mr-2" />
                   <span>카카오톡 알림</span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     className="sr-only peer"
                     checked={kakaoNotification}
                     onChange={() => setKakaoNotification(!kakaoNotification)}
@@ -234,22 +272,34 @@ export default function BriefingSettings() {
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
-              
-              <div className="flex items-center justify-between">
+
+              {kakaoNotification && (
+                <div className="ml-7 transition-all duration-300 ease-in-out">
+                  <input
+                    type="text"
+                    placeholder="카카오톡 주소"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={kakao}
+                    onChange={(e) => setKakao(e.target.value)}
+                  />
+                </div>
+              )}
+
+              {/* <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <Bell className="h-5 w-5 text-gray-500 mr-2" />
                   <span>Slack 알림</span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     className="sr-only peer"
                     checked={slackNotification}
                     onChange={() => setSlackNotification(!slackNotification)}
                   />
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -257,39 +307,98 @@ export default function BriefingSettings() {
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4">브리핑 주기 설정</h2>
             <p className="text-gray-600 mb-4">브리핑을 받을 주기를 선택하세요.</p>
-            
-            <div className="grid grid-cols-3 gap-3">
-              <div 
+
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              <div
                 className={`flex items-center justify-center p-3 rounded-md cursor-pointer transition-all duration-200 ${
-                  briefingFrequency === 'daily'
-                    ? 'bg-blue-50 shadow-sm text-blue-700'
-                    : 'hover:bg-gray-100'
+                  briefingFrequency === 'daily' ? 'bg-blue-50 shadow-sm text-blue-700' : 'hover:bg-gray-100'
                 }`}
                 onClick={() => setBriefingFrequency('daily')}
               >
                 <span className="font-medium">매일</span>
               </div>
-              <div 
+              <div
                 className={`flex items-center justify-center p-3 rounded-md cursor-pointer transition-all duration-200 ${
-                  briefingFrequency === 'weekly'
-                    ? 'bg-blue-50 shadow-sm text-blue-700'
-                    : 'hover:bg-gray-100'
+                  briefingFrequency === 'weekly' ? 'bg-blue-50 shadow-sm text-blue-700' : 'hover:bg-gray-100'
                 }`}
                 onClick={() => setBriefingFrequency('weekly')}
               >
                 <span className="font-medium">주간</span>
               </div>
-              <div 
+              <div
                 className={`flex items-center justify-center p-3 rounded-md cursor-pointer transition-all duration-200 ${
-                  briefingFrequency === 'monthly'
-                    ? 'bg-blue-50 shadow-sm text-blue-700'
-                    : 'hover:bg-gray-100'
+                  briefingFrequency === 'monthly' ? 'bg-blue-50 shadow-sm text-blue-700' : 'hover:bg-gray-100'
                 }`}
                 onClick={() => setBriefingFrequency('monthly')}
               >
                 <span className="font-medium">월간</span>
               </div>
             </div>
+
+            {/* 시간 선택 (모든 주기에 공통) */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">시간 선택</label>
+              <select
+                value={selectedTime}
+                onChange={(e) => setSelectedTime(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {Array.from({ length: 24 }, (_, i) => {
+                  const hour = i.toString().padStart(2, '0');
+                  return (
+                    <option key={hour} value={`${hour}:00`}>
+                      {hour}시
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+
+            {/* 주간 선택 시 요일 선택 */}
+            {briefingFrequency === 'weekly' && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">요일 선택</label>
+                <div className="grid grid-cols-7 gap-2">
+                  {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
+                    <div
+                      key={day}
+                      className={`flex items-center justify-center p-2 rounded-md cursor-pointer transition-all duration-200 ${
+                        selectedDays.includes(day)
+                          ? 'bg-blue-50 text-blue-700 border border-blue-500'
+                          : 'border border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => {
+                        setSelectedDays(day);
+                      }}
+                    >
+                      {day}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 월간 선택 시 날짜 선택 */}
+            {briefingFrequency === 'monthly' && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">날짜 선택</label>
+                <div className="grid grid-cols-7 gap-2">
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map((date) => (
+                    <div
+                      key={date}
+                      className={`flex items-center justify-center p-2 rounded-md cursor-pointer transition-all duration-200 ${
+                        selectedDate === date
+                          ? 'bg-blue-50 text-blue-700 border border-blue-500'
+                          : 'border border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setSelectedDate(date)}
+                    >
+                      {date}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 저장 버튼 */}
