@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { NewsPaper, Category, TrendData } from '@/types/type';
-import { fetchNews, fetchPapers, fetchCategories, fetchTrends } from '@/app/api/newsApi';
+import { fetchNews, fetchPapers, fetchCategories, fetchTrends, fetchAllNews, fetchAllPapers } from '@/app/api/newsApi';
 import { fetchSubCategoryTrends, fetchSubCategoryTrendsByCategory } from '@/app/api/subCategoryTrends';
 import {
   LineChart,
@@ -29,7 +29,6 @@ interface NewsPaperWithCategory extends NewsPaper {
 
 export default function Dashboard() {
   const [news, setNews] = useState<NewsPaperWithCategory[]>([]);
-  console.log('news', news);
   const [papers, setPapers] = useState<NewsPaperWithCategory[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [trends, setTrends] = useState<TrendData[]>([]);
@@ -42,20 +41,18 @@ export default function Dashboard() {
   const [chartType, setChartType] = useState<'line' | 'area' | 'bar'>('area');
 
   useEffect(() => {
+    const storedUsername = localStorage.getItem('username');
     // 데이터 로드
     const loadData = async () => {
       try {
-        const newsData = await fetchNews();
-        console.log('newsData response:', newsData);
-        const papersData = await fetchPapers();
-        console.log('papersData response:', papersData);
+        const newsData = storedUsername ? await fetchNews() : await fetchAllNews();
+        const papersData = storedUsername ? await fetchPapers() : await fetchAllPapers();
         const categoriesData = await fetchCategories();
         const trendsData = await fetchTrends();
         const subCategoryTrendsData = await fetchSubCategoryTrends();
 
         setNews(
           newsData.map((response) => {
-            console.log('response:', response);
             return {
               ...response.newspaper,
               category: response.categories || [],
@@ -64,7 +61,6 @@ export default function Dashboard() {
         );
         setPapers(
           papersData.map((response) => {
-            console.log('response:', response);
             return {
               ...response.newspaper,
               category: response.categories || [],
@@ -255,7 +251,7 @@ export default function Dashboard() {
   // 뉴스/논문 카드 렌더링
   const renderNewsPaperCard = (item: NewsPaperWithCategory) => {
     return (
-      <Link href={`/news-detail?id=${item.id}`} key={item.title}>
+      <Link href={`/news-detail?id=${item.id}&type=${item.type}`} key={item.title}>
         <div key={item.title} className="bg-white rounded-lg shadow-md p-6 mb-4 hover:bg-gray-50">
           <div className="mb-4">
             <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">

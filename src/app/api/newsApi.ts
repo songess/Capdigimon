@@ -11,8 +11,26 @@ export async function fetchNews(): Promise<NewsPaperResponse[]> {
   return response.json();
 }
 
+// 모든 뉴스 데이터 가져오기
+export async function fetchAllNews(): Promise<NewsPaperResponse[]> {
+  // 실제 프로덕션에서는 실제 API를 사용해야 합니다
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/dashboard/?type=news`, {
+    credentials: 'include',
+  });
+  // const data = await response.json();
+  // return data.articles.map(mapToNewsFormat);
+  return response.json();
+}
+
 // 논문 데이터 가져오기
 export async function fetchPapers(): Promise<NewsPaperResponse[]> {
+  // 실제 프로덕션에서는 실제 API를 사용해야 합니다
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/dashboard/?type=paper`);
+  return response.json();
+}
+
+// 모든 논문 데이터 가져오기
+export async function fetchAllPapers(): Promise<NewsPaperResponse[]> {
   // 실제 프로덕션에서는 실제 API를 사용해야 합니다
   const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/dashboard/?type=paper`);
   return response.json();

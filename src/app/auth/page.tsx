@@ -21,12 +21,12 @@ export default function AuthPage() {
         await fetchLogin(email, password);
 
         toast.success('로그인되었습니다.');
-        router.push('/dashboard');
       } else {
         await fetchSignUp(email, password, name);
         toast.success('회원가입이 완료되었습니다.');
-        router.push('/dashboard');
       }
+      localStorage.setItem('username', '송은수');
+      router.push('/dashboard');
     } catch (error) {
       console.error('Auth error:', error);
       toast.error('오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
