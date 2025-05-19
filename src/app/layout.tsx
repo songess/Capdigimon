@@ -13,13 +13,21 @@ export const metadata: Metadata = {
   icons: {
     icon: '/png/capdisimon.png',
   },
+  openGraph: {
+    images: [
+      {
+        url: '/png/newseeker.png',
+      },
+    ],
+  },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="ko">
       <body className={inter.className}>
