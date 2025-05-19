@@ -67,3 +67,9 @@ export interface AdminStats {
     itemsProcessed: number;
   };
 }
+
+export interface LoginResponse extends Response {
+  access_token: string;
+  message: string;
+  username: string;
+}

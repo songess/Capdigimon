@@ -1,4 +1,4 @@
-import { Category, TrendData, AdminStats, NewsPaperResponse } from '@/types/type';
+import { Category, TrendData, AdminStats, NewsPaperResponse, LoginResponse } from '@/types/type';
 
 // 뉴스 데이터 가져오기
 export async function fetchNews(): Promise<NewsPaperResponse[]> {
@@ -67,7 +67,7 @@ export async function fetchSignUp(email: string, password: string, name: string)
   return response.json();
 }
 
-export async function fetchLogin(email: string, password: string): Promise<Response> {
+export async function fetchLogin(email: string, password: string): Promise<LoginResponse> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/login/access-token`, {
     method: 'POST',
     headers: {

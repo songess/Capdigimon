@@ -1,37 +1,27 @@
 'use client';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { AuthStatus } from './AuthStatus';
+import { MobileAuthStatus } from './MobileAuthStatus';
+import { useEffect } from 'react';
 
-export default function Navbar() {
+interface NavbarProps {
+  isAuthenticated: boolean;
+  username: string;
+}
+
+export default function Navbar({ isAuthenticated, username }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedUsername = localStorage.getItem('username');
-    setUsername(storedUsername);
-  }, []);
+    // 주기적으로 서버 컴포넌트의 데이터를 새로고침
+    const interval = setInterval(() => {
+      router.refresh();
+    }, 5000);
 
-  const handleLogout = async () => {
-    try {
-      // 로그아웃 API 호출
-      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/logout`, {
-        credentials: 'include',
-      });
-
-      // 로컬 스토리지에서 username 제거
-      localStorage.removeItem('username');
-      setUsername(null);
-
-      // 홈페이지로 리다이렉트
-      router.push('/');
-    } catch (error) {
-      console.error('로그아웃 중 오류 발생:', error);
-    }
-  };
+    return () => clearInterval(interval);
+  }, [router]);
 
   return (
     <nav className="bg-white border-b border-gray-200 fixed w-full z-10">
@@ -87,25 +77,7 @@ export default function Navbar() {
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            {username ? (
-              <div className="flex items-center gap-4">
-                <span className="text-gray-700 font-bold">{username}님, 안녕하세요</span>
-                <Button variant="outline" onClick={handleLogout}>
-                  로그아웃
-                </Button>
-              </div>
-            ) : (
-              <>
-                <Link href="/auth">
-                  <Button variant="outline" className="mr-2">
-                    로그인
-                  </Button>
-                </Link>
-                <Link href="/auth">
-                  <Button>회원가입</Button>
-                </Link>
-              </>
-            )}
+            <AuthStatus isAuthenticated={isAuthenticated} username={username} />
           </div>
           <div className="-mr-2 flex items-center sm:hidden">
             <button
@@ -174,27 +146,7 @@ export default function Navbar() {
           </Link>
         </div>
         <div className="pt-4 pb-3 border-t border-gray-200">
-          <div className="flex items-center px-4">
-            {username ? (
-              <div className="flex flex-col gap-2 w-full">
-                <span className="text-gray-700">{username}님</span>
-                <Button variant="outline" onClick={handleLogout} className="w-full">
-                  로그아웃
-                </Button>
-              </div>
-            ) : (
-              <>
-                <Link href="/auth" className="w-full">
-                  <Button variant="outline" className="w-full mb-2">
-                    로그인
-                  </Button>
-                </Link>
-                <Link href="/auth" className="w-full">
-                  <Button className="w-full">회원가입</Button>
-                </Link>
-              </>
-            )}
-          </div>
+          <MobileAuthStatus isAuthenticated={isAuthenticated} username={username} />
         </div>
       </div>
     </nav>

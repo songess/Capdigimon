@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { fetchLogin, fetchSignUp } from '../api/newsApi';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { setCookie } from 'cookies-next';
+
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -18,14 +20,14 @@ export default function AuthPage() {
     e.preventDefault();
     try {
       if (isLogin) {
-        await fetchLogin(email, password);
-
+        const response = await fetchLogin(email, password);
+        setCookie('access_token', response.access_token);
+        setCookie('username', response.username);
         toast.success('로그인되었습니다.');
       } else {
         await fetchSignUp(email, password, name);
         toast.success('회원가입이 완료되었습니다.');
       }
-      localStorage.setItem('username', '송은수');
       router.push('/dashboard');
     } catch (error) {
       console.error('Auth error:', error);

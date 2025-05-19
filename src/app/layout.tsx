@@ -4,6 +4,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import { Toaster } from 'react-hot-toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { getAuthStatus } from '@/utils/auth';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,12 +28,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { isAuthenticated, username } = await getAuthStatus();
 
   return (
     <html lang="ko">
       <body className={inter.className}>
         <ErrorBoundary>
-          <Navbar />
+          <Navbar isAuthenticated={isAuthenticated} username={username} />
           <div className="pt-16">{children}</div>
         </ErrorBoundary>
         <Toaster position="top-center" />
