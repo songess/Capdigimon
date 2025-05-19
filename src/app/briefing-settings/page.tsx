@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Category } from '@/types/type';
-import { fetchCategories } from '@/app/api/newsApi';
-import { Check, ChevronRight, ChevronDown, Mail, MessageSquare, Bell } from 'lucide-react';
+import { fetchCategories, fetchCategoryToggle, fetchSelectedCategories } from '@/app/api/newsApi';
+import { Check, ChevronRight, ChevronDown, Mail, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function BriefingSettings() {
@@ -27,7 +27,8 @@ export default function BriefingSettings() {
         const categoriesData = await fetchCategories();
         setCategories(categoriesData);
         // 기본 선택된 서브 카테고리
-        setSelectedSubCategories(['머신러닝', '딥러닝']);
+        const selectedSubCategories = await fetchSelectedCategories();
+        setSelectedSubCategories(selectedSubCategories);
         // 기본 선택된 카테고리 확장
         setExpandedCategories(['ARTIFICIAL_INTELLIGENCE_ROBOTICS']);
       } catch (error) {
@@ -43,45 +44,48 @@ export default function BriefingSettings() {
   const hasSelectedSubCategories = (category: Category) => {
     if (!category.subcategories) return false;
 
-    return category.subcategories.some((subCategory) => selectedSubCategories.includes(subCategory.name));
+    return category.subcategories.some((subCategory) => selectedSubCategories.includes(subCategory.id));
   };
 
-  const handleCategoryToggle = (categoryName: string) => {
+  const handleCategoryToggle = (categoryId: string) => {
     // 확장된 카테고리 목록 복사
     const updatedExpandedCategories = [...expandedCategories];
 
-    if (expandedCategories.includes(categoryName)) {
+    if (expandedCategories.includes(categoryId)) {
       // 이미 확장된 카테고리라면 제거 (닫기)
-      const index = updatedExpandedCategories.indexOf(categoryName);
+      const index = updatedExpandedCategories.indexOf(categoryId);
       updatedExpandedCategories.splice(index, 1);
     } else {
       // 확장되지 않은 카테고리라면 추가 (열기)
-      updatedExpandedCategories.push(categoryName);
+      updatedExpandedCategories.push(categoryId);
     }
 
     // 서브 카테고리가 선택된 카테고리들은 항상 확장 상태 유지
     categories.forEach((category) => {
-      if (hasSelectedSubCategories(category) && !updatedExpandedCategories.includes(category.name)) {
-        updatedExpandedCategories.push(category.name);
+      if (hasSelectedSubCategories(category) && !updatedExpandedCategories.includes(category.id)) {
+        updatedExpandedCategories.push(category.id);
       }
     });
 
     setExpandedCategories(updatedExpandedCategories);
   };
 
-  const handleSubCategoryToggle = (subCategoryName: string, categoryName: string) => {
-    if (selectedSubCategories.includes(subCategoryName)) {
-      setSelectedSubCategories(selectedSubCategories.filter((cat) => cat !== subCategoryName));
+  const handleSubCategoryToggle = async (subCategoryName: string, categoryName: string, subCategoryId: string) => {
+    await fetchCategoryToggle(subCategoryId).then((res) => {
+      console.log('response', res);
+    });
+    if (selectedSubCategories.includes(subCategoryId)) {
+      setSelectedSubCategories(selectedSubCategories.filter((cat) => cat !== subCategoryId));
       toast.success(`${subCategoryName} 서브 카테고리가 제거되었습니다.`, {
         duration: 2000,
         position: 'bottom-center',
       });
 
       // 해당 카테고리의 모든 서브 카테고리가 선택 해제되었는지 확인
-      const category = categories.find((c) => c.name === categoryName);
+      const category = categories.find((c) => c.id === categoryName);
       if (category && category.subcategories) {
         const stillHasSelected = category.subcategories.some(
-          (subCat) => subCat.name !== subCategoryName && selectedSubCategories.includes(subCat.name),
+          (subCat) => subCat.id !== subCategoryName && selectedSubCategories.includes(subCat.id),
         );
 
         // 모든 서브 카테고리가 선택 해제되었다면 확장 상태에서 제거할 수 있음
@@ -90,7 +94,7 @@ export default function BriefingSettings() {
         }
       }
     } else {
-      setSelectedSubCategories([...selectedSubCategories, subCategoryName]);
+      setSelectedSubCategories([...selectedSubCategories, subCategoryId]);
       toast.success(`${subCategoryName} 서브 카테고리가 추가되었습니다.`, {
         duration: 2000,
         position: 'bottom-center',
@@ -161,7 +165,7 @@ export default function BriefingSettings() {
 
             <div className="space-y-4">
               {getFilteredCategories().map((category) => {
-                const isExpanded = expandedCategories.includes(category.name);
+                const isExpanded = expandedCategories.includes(category.id);
 
                 return (
                   <div
@@ -170,11 +174,10 @@ export default function BriefingSettings() {
                   >
                     <div
                       className={`flex items-center p-4 cursor-pointer bg-white hover:bg-gray-50 transition-colors duration-200`}
-                      onClick={() => handleCategoryToggle(category.name)}
+                      onClick={() => handleCategoryToggle(category.id)}
                     >
                       <div className="flex-1">
                         <div className="font-medium">{category.name}</div>
-                        <div className="text-xs text-gray-500">{category.description}</div>
                       </div>
                       <div className="transition-transform duration-200">
                         {isExpanded ? (
@@ -197,17 +200,16 @@ export default function BriefingSettings() {
                             <div
                               key={subCategory.id}
                               className={`flex items-center p-2 rounded-md cursor-pointer border ${
-                                selectedSubCategories.includes(subCategory.name)
+                                selectedSubCategories.includes(subCategory.id)
                                   ? 'border-blue-500 bg-blue-50'
                                   : 'border-gray-200 hover:border-gray-300'
                               } transition-all duration-200`}
-                              onClick={() => handleSubCategoryToggle(subCategory.name, category.name)}
+                              onClick={() => handleSubCategoryToggle(subCategory.name, category.name, subCategory.id)}
                             >
                               <div className="flex-1">
                                 <div className="font-medium text-sm">{subCategory.name}</div>
-                                <div className="text-xs text-gray-500">{subCategory.description}</div>
                               </div>
-                              {selectedSubCategories.includes(subCategory.name) && (
+                              {selectedSubCategories.includes(subCategory.id) && (
                                 <Check className="h-4 w-4 text-blue-500" />
                               )}
                             </div>

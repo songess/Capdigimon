@@ -51,6 +51,21 @@ export async function fetchCategories(): Promise<Category[]> {
   return mockCategories;
 }
 
+export async function fetchSelectedCategories(): Promise<string[]> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/categories/me/categories`, {
+    credentials: 'include',
+  });
+  return response.json();
+}
+
+export async function fetchCategoryToggle(subCategoryId: string): Promise<Response> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/categories/me/categories/toggle?category_name=${subCategoryId}`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+  return response.json();
+}
+
 // 키워드 트렌드 데이터 가져오기
 export async function fetchTrends(): Promise<TrendData[]> {
   return mockTrends;
