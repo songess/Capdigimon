@@ -3,9 +3,41 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Category } from '@/types/type';
-import { fetchCategories, fetchCategoryToggle, fetchSelectedCategories } from '@/app/api/newsApi';
+import {
+  fetchCategories,
+  fetchCategoryToggle,
+  fetchSelectedCategories,
+  fetchMyAlarm,
+  patchAlarmEmailOn,
+  patchAlarmKakaoOn,
+  patchAlarmFrequency,
+  patchAlarmDayOfMonth,
+  patchAlarmDayOfWeek,
+  patchAlarmReceiveTime,
+} from '@/app/api/newsApi';
 import { Check, ChevronRight, ChevronDown, Mail, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { dayOfMonthEnum, dayOfWeekEnum, receiveTimeEnum } from '@/types/type';
+
+const dayMappingKorToEng: { [key: string]: dayOfWeekEnum } = {
+  월: 'monday',
+  화: 'tuesday',
+  수: 'wednesday',
+  목: 'thursday',
+  금: 'friday',
+  토: 'saturday',
+  일: 'sunday',
+};
+
+const dayMappingEngToKor: { [key: string]: string } = {
+  monday: '월',
+  tuesday: '화',
+  wednesday: '수',
+  thursday: '목',
+  friday: '금',
+  saturday: '토',
+  sunday: '일',
+};
 
 export default function BriefingSettings() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -19,17 +51,15 @@ export default function BriefingSettings() {
   const [selectedDays, setSelectedDays] = useState<string>('월');
   const [selectedDate, setSelectedDate] = useState<number>(1);
   const [email, setEmail] = useState<string>('user@example.com');
-  const [kakao, setKakao] = useState<string>('kakaoid');
+  const [kakao, setKakao] = useState<string>('아직 어떤 방식으로 연동하는지 모름');
 
   useEffect(() => {
     const loadCategories = async () => {
       try {
         const categoriesData = await fetchCategories();
         setCategories(categoriesData);
-        // 기본 선택된 서브 카테고리
         const selectedSubCategories = await fetchSelectedCategories();
         setSelectedSubCategories(selectedSubCategories);
-        // 기본 선택된 카테고리 확장
         setExpandedCategories(['ARTIFICIAL_INTELLIGENCE_ROBOTICS']);
       } catch (error) {
         console.error('카테고리 로드 중 오류 발생:', error);
@@ -37,7 +67,28 @@ export default function BriefingSettings() {
       }
     };
 
+    const loadAlarmSettings = async () => {
+      try {
+        const alarmData = await fetchMyAlarm();
+        console.log('alarmData', alarmData);
+        setEmailNotification(alarmData.email_on);
+        setKakaoNotification(alarmData.kakao_on);
+        setBriefingFrequency(alarmData.frequency);
+        setSelectedTime(alarmData.receive_time);
+
+        if (alarmData.frequency === 'weekly') {
+          setSelectedDays(dayMappingEngToKor[alarmData.day_of_week]);
+        } else if (alarmData.frequency === 'monthly') {
+          setSelectedDate(alarmData.day_of_month);
+        }
+      } catch (error) {
+        console.error('알림 설정 로드 중 오류 발생:', error);
+        toast.error('알림 설정 로드 중 오류가 발생했습니다.');
+      }
+    };
+
     loadCategories();
+    loadAlarmSettings();
   }, []);
 
   // 카테고리에 속한 서브 카테고리 중 하나라도 선택되어 있는지 확인하는 함수
@@ -126,6 +177,72 @@ export default function BriefingSettings() {
       return categories.filter((category) => category.name === 'IT 기업');
     } else {
       return categories.filter((category) => category.name === '컴퓨터 공학' || category.name === '전기/전자 공학');
+    }
+  };
+
+  const handleEmailToggle = async () => {
+    try {
+      await patchAlarmEmailOn();
+      setEmailNotification(!emailNotification);
+      toast.success('이메일 알림 설정이 변경되었습니다.');
+    } catch (error) {
+      console.error('이메일 알림 설정 변경 중 오류 발생:', error);
+      toast.error('이메일 알림 설정 변경 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleKakaoToggle = async () => {
+    try {
+      await patchAlarmKakaoOn();
+      setKakaoNotification(!kakaoNotification);
+      toast.success('카카오톡 알림 설정이 변경되었습니다.');
+    } catch (error) {
+      console.error('카카오톡 알림 설정 변경 중 오류 발생:', error);
+      toast.error('카카오톡 알림 설정 변경 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleFrequencyChange = async (frequency: 'daily' | 'weekly' | 'monthly') => {
+    try {
+      await patchAlarmFrequency(frequency);
+      setBriefingFrequency(frequency);
+      toast.success('브리핑 주기가 변경되었습니다.');
+    } catch (error) {
+      console.error('브리핑 주기 변경 중 오류 발생:', error);
+      toast.error('브리핑 주기 변경 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleDayOfWeekChange = async (day: string) => {
+    try {
+      await patchAlarmDayOfWeek(dayMappingKorToEng[day]);
+      setSelectedDays(day);
+      toast.success('요일이 변경되었습니다.');
+    } catch (error) {
+      console.error('요일 변경 중 오류 발생:', error);
+      toast.error('요일 변경 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleDayOfMonthChange = async (date: number) => {
+    try {
+      await patchAlarmDayOfMonth(date as dayOfMonthEnum);
+      setSelectedDate(date);
+      toast.success('날짜가 변경되었습니다.');
+    } catch (error) {
+      console.error('날짜 변경 중 오류 발생:', error);
+      toast.error('날짜 변경 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleTimeChange = async (time: string) => {
+    try {
+      await patchAlarmReceiveTime(time as receiveTimeEnum);
+      setSelectedTime(time);
+      toast.success('시간이 변경되었습니다.');
+    } catch (error) {
+      console.error('시간 변경 중 오류 발생:', error);
+      toast.error('시간 변경 중 오류가 발생했습니다.');
     }
   };
 
@@ -241,7 +358,7 @@ export default function BriefingSettings() {
                     type="checkbox"
                     className="sr-only peer"
                     checked={emailNotification}
-                    onChange={() => setEmailNotification(!emailNotification)}
+                    onChange={handleEmailToggle}
                   />
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
@@ -269,7 +386,7 @@ export default function BriefingSettings() {
                     type="checkbox"
                     className="sr-only peer"
                     checked={kakaoNotification}
-                    onChange={() => setKakaoNotification(!kakaoNotification)}
+                    onChange={handleKakaoToggle}
                   />
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
@@ -286,22 +403,6 @@ export default function BriefingSettings() {
                   />
                 </div>
               )}
-
-              {/* <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <Bell className="h-5 w-5 text-gray-500 mr-2" />
-                  <span>Slack 알림</span>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={slackNotification}
-                    onChange={() => setSlackNotification(!slackNotification)}
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-              </div> */}
             </div>
           </div>
 
@@ -315,7 +416,7 @@ export default function BriefingSettings() {
                 className={`flex items-center justify-center p-3 rounded-md cursor-pointer transition-all duration-200 ${
                   briefingFrequency === 'daily' ? 'bg-blue-50 shadow-sm text-blue-700' : 'hover:bg-gray-100'
                 }`}
-                onClick={() => setBriefingFrequency('daily')}
+                onClick={() => handleFrequencyChange('daily')}
               >
                 <span className="font-medium">매일</span>
               </div>
@@ -323,7 +424,7 @@ export default function BriefingSettings() {
                 className={`flex items-center justify-center p-3 rounded-md cursor-pointer transition-all duration-200 ${
                   briefingFrequency === 'weekly' ? 'bg-blue-50 shadow-sm text-blue-700' : 'hover:bg-gray-100'
                 }`}
-                onClick={() => setBriefingFrequency('weekly')}
+                onClick={() => handleFrequencyChange('weekly')}
               >
                 <span className="font-medium">주간</span>
               </div>
@@ -331,24 +432,24 @@ export default function BriefingSettings() {
                 className={`flex items-center justify-center p-3 rounded-md cursor-pointer transition-all duration-200 ${
                   briefingFrequency === 'monthly' ? 'bg-blue-50 shadow-sm text-blue-700' : 'hover:bg-gray-100'
                 }`}
-                onClick={() => setBriefingFrequency('monthly')}
+                onClick={() => handleFrequencyChange('monthly')}
               >
                 <span className="font-medium">월간</span>
               </div>
             </div>
 
-            {/* 시간 선택 (모든 주기에 공통) */}
+            {/* 시간 선택 */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">시간 선택</label>
               <select
                 value={selectedTime}
-                onChange={(e) => setSelectedTime(e.target.value)}
+                onChange={(e) => handleTimeChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {Array.from({ length: 24 }, (_, i) => {
                   const hour = i.toString().padStart(2, '0');
                   return (
-                    <option key={hour} value={`${hour}:00`}>
+                    <option key={hour} value={`${hour}:00:00`}>
                       {hour}시
                     </option>
                   );
@@ -369,9 +470,7 @@ export default function BriefingSettings() {
                           ? 'bg-blue-50 text-blue-700 border border-blue-500'
                           : 'border border-gray-200 hover:border-gray-300'
                       }`}
-                      onClick={() => {
-                        setSelectedDays(day);
-                      }}
+                      onClick={() => handleDayOfWeekChange(day)}
                     >
                       {day}
                     </div>
@@ -393,7 +492,7 @@ export default function BriefingSettings() {
                           ? 'bg-blue-50 text-blue-700 border border-blue-500'
                           : 'border border-gray-200 hover:border-gray-300'
                       }`}
-                      onClick={() => setSelectedDate(date)}
+                      onClick={() => handleDayOfMonthChange(date)}
                     >
                       {date}
                     </div>

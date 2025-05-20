@@ -1,4 +1,15 @@
-import { Category, TrendData, AdminStats, NewsPaperResponse, LoginResponse } from '@/types/type';
+import {
+  Category,
+  TrendData,
+  AdminStats,
+  NewsPaperResponse,
+  LoginResponse,
+  AlarmResponse,
+  dayOfMonthEnum,
+  dayOfWeekEnum,
+  receiveTimeEnum,
+  frequencyEnum,
+} from '@/types/type';
 
 // 뉴스 데이터 가져오기
 export async function fetchNews(): Promise<NewsPaperResponse[]> {
@@ -59,10 +70,13 @@ export async function fetchSelectedCategories(): Promise<string[]> {
 }
 
 export async function fetchCategoryToggle(subCategoryId: string): Promise<Response> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/categories/me/categories/toggle?category_name=${subCategoryId}`, {
-    method: 'POST',
-    credentials: 'include',
-  });
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/categories/me/categories/toggle?category_name=${subCategoryId}`,
+    {
+      method: 'POST',
+      credentials: 'include',
+    },
+  );
   return response.json();
 }
 
@@ -107,6 +121,87 @@ export async function fetchLogin(email: string, password: string): Promise<Login
   }
   return response.json();
 }
+
+// 알람 설정 정보 가져오기
+export async function fetchMyAlarm(): Promise<AlarmResponse> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/alarms/me`, {
+    credentials: 'include',
+  });
+  return response.json();
+}
+
+// 이메일 알람 ON/OFF 토글
+export async function patchAlarmEmailOn(): Promise<Response> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/alarms/me/email_on`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+  });
+  return response.json();
+}
+
+// 카카오 알람 ON/OFF 토글
+export async function patchAlarmKakaoOn(): Promise<Response> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/alarms/me/kakao_on`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+  });
+  return response.json();
+}
+
+// 알람 빈도 설정
+export async function patchAlarmFrequency(frequency: frequencyEnum): Promise<Response> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/alarms/me/frequency?frequency=${frequency}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+    },
+  );
+  return response.json();
+}
+
+// 월별 알람 날짜 설정
+export async function patchAlarmDayOfMonth(dayOfMonth: dayOfMonthEnum): Promise<Response> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/alarms/me/day_of_month?day_of_month=${dayOfMonth}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+    },
+  );
+  return response.json();
+}
+
+// 주별 알람 요일 설정
+export async function patchAlarmDayOfWeek(dayOfWeek: dayOfWeekEnum): Promise<Response> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/alarms/me/day_of_week?day_of_week=${dayOfWeek}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+    },
+  );
+  return response.json();
+}
+
+// 알람 수신 시간 설정
+export async function patchAlarmReceiveTime(receiveTime: receiveTimeEnum): Promise<Response> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/alarms/me/receive_time?receive_time=${receiveTime}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+    },
+  );
+  return response.json();
+}
+
 // 목업 데이터
 // const mockNews: NewsPaper[] = [
 //   {
@@ -273,6 +368,16 @@ const mockCategories: Category[] = [
     ],
   },
 ];
+
+export function subCategoriesEngToKor(engId: string): string {
+  for (const category of mockCategories) {
+    const subcategory = category.subcategories?.find((sub) => sub.id === engId);
+    if (subcategory) {
+      return subcategory.name;
+    }
+  }
+  return '알 수 없는 카테고리';
+}
 
 const mockTrends: TrendData[] = [
   { date: '2025-01', keyword: '인공지능', count: 120 },
