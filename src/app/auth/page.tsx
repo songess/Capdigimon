@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { fetchLogin, fetchSignUp } from '../api/newsApi';
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { setCookie } from 'cookies-next';
 
 export default function AuthPage() {
@@ -16,6 +16,9 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const from = searchParams.get('from') || '/dashboard';
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -24,11 +27,12 @@ export default function AuthPage() {
         setCookie('access_token', response.access_token);
         setCookie('username', response.username);
         toast.success('로그인되었습니다.');
+        router.push(from);
       } else {
         await fetchSignUp(email, password, name);
         toast.success('회원가입이 완료되었습니다.');
+        router.push('/dashboard');
       }
-      router.push('/dashboard');
     } catch (error) {
       console.error('Auth error:', error);
       toast.error('오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
@@ -83,7 +87,7 @@ export default function AuthPage() {
                       onChange={(e) => handleInputChange(e, setEmail)}
                       required
                       autoComplete="email"
-                      className="w-full px-4 py-3 text-lg bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3 text-lg bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder:text-gray-400"
                       placeholder="example@email.com"
                     />
                   </div>
@@ -98,7 +102,7 @@ export default function AuthPage() {
                       onChange={(e) => handleInputChange(e, setPassword)}
                       required
                       autoComplete="current-password"
-                      className="w-full px-4 py-3 text-lg bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3 text-lg bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder:text-gray-400"
                       placeholder="••••••••"
                     />
                   </div>
