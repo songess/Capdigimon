@@ -151,7 +151,7 @@ export default function BriefingSettings() {
                 }`}
                 onClick={() => setSelectedTab('news')}
               >
-                뉴스
+                IT 기업
               </button>
               <button
                 className={`px-4 py-2 rounded-md transition-all duration-200 ${
@@ -159,7 +159,7 @@ export default function BriefingSettings() {
                 }`}
                 onClick={() => setSelectedTab('paper')}
               >
-                논문
+                컴퓨터 및 전자공학
               </button>
             </div>
 

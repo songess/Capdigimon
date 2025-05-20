@@ -48,7 +48,6 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
     // 데이터 로드
     const loadData = async () => {
       try {
-        console.log('access_token', access_token);
         const newsData = access_token ? await fetchNews() : await fetchAllNews();
         const papersData = access_token ? await fetchPapers() : await fetchAllPapers();
         const categoriesData = await fetchCategories();
@@ -262,7 +261,7 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
               {item.category ? item.category.join(', ') : '미분류'}
             </span>
             <span className="text-sm text-gray-500 ml-2">
-              {item.source} | {item.date}
+              {item.source} | {item.type === 'news' ? item.date.slice(0, 10) : item.date.slice(0, 4)}
             </span>
           </div>
           <div className="flex justify-between items-start mb-4">
@@ -274,8 +273,8 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
               <span className="font-medium">{item.source}</span>
               {item.type === 'paper' && <span className="ml-2">- {item.author}</span>}
             </div>
-            <div className="flex justify-end">
-              <Button variant="outline" size="sm">
+            <div className="flex justify-end ">
+              <Button variant="outline" size="sm" className="hover:cursor-pointer">
                 자세히 보기
               </Button>
             </div>
