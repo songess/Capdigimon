@@ -73,3 +73,74 @@ export interface LoginResponse extends Response {
   message: string;
   username: string;
 }
+
+export interface AlarmResponse extends Response {
+  id: string;
+  user_id: string;
+  frequency: frequencyEnum;
+  day_of_week: dayOfWeekEnum;
+  day_of_month: dayOfMonthEnum;
+  receive_time: receiveTimeEnum;
+  email_on: boolean;
+  kakao_on: boolean;
+}
+
+export type frequencyEnum = 'daily' | 'weekly' | 'monthly';
+export type dayOfWeekEnum = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+export type dayOfMonthEnum =
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 11
+  | 12
+  | 13
+  | 14
+  | 15
+  | 16
+  | 17
+  | 18
+  | 19
+  | 20
+  | 21
+  | 22
+  | 23
+  | 24
+  | 25
+  | 26
+  | 27
+  | 28
+  | 29
+  | 30
+  | 31;
+export type receiveTimeEnum =
+  | '00:00'
+  | '01:00'
+  | '02:00'
+  | '03:00'
+  | '04:00'
+  | '05:00'
+  | '06:00'
+  | '07:00'
+  | '08:00'
+  | '09:00'
+  | '10:00'
+  | '11:00'
+  | '12:00'
+  | '13:00'
+  | '14:00'
+  | '15:00'
+  | '16:00'
+  | '17:00'
+  | '18:00'
+  | '19:00'
+  | '20:00'
+  | '21:00'
+  | '22:00'
+  | '23:00';

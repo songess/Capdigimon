@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { NewsPaper, Category, TrendData } from '@/types/type';
-import { fetchNews, fetchPapers, fetchCategories, fetchTrends, fetchAllNews, fetchAllPapers } from '@/app/api/newsApi';
+import {
+  fetchNews,
+  fetchPapers,
+  fetchCategories,
+  fetchTrends,
+  fetchAllNews,
+  fetchAllPapers,
+  subCategoriesEngToKor,
+} from '@/app/api/newsApi';
 import { fetchSubCategoryTrends, fetchSubCategoryTrendsByCategory } from '@/app/api/subCategoryTrends';
 import {
   LineChart,
@@ -253,12 +261,13 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
 
   // 뉴스/논문 카드 렌더링
   const renderNewsPaperCard = (item: NewsPaperWithCategory) => {
+    const categoryKor = item.category.map((category) => subCategoriesEngToKor(category));
     return (
       <Link href={`/news-detail?id=${item.id}&type=${item.type}`} key={item.title}>
         <div key={item.title} className="bg-white rounded-lg shadow-md p-6 mb-4 hover:bg-gray-50">
           <div className="mb-4">
             <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-              {item.category ? item.category.join(', ') : '미분류'}
+              {item.category ? categoryKor.join(', ') : '미분류'}
             </span>
             <span className="text-sm text-gray-500 ml-2">
               {item.source} | {item.type === 'news' ? item.date.slice(0, 10) : item.date.slice(0, 4)}
