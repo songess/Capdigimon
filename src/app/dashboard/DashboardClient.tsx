@@ -11,6 +11,7 @@ import {
   fetchAllPapers,
   subCategoriesEngToKor,
   fetchNewsHighlight,
+  incrementNewsViewCount,
 } from '@/app/api/newsApi';
 import { fetchSubCategoryTrends, fetchSubCategoryTrendsByCategory } from '@/app/api/subCategoryTrends';
 import {
@@ -53,7 +54,10 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
   const [selectedTrendCategory, setSelectedTrendCategory] = useState<string>('');
   const [chartType, setChartType] = useState<'line' | 'area' | 'bar'>('area');
   const [categoryHighlight, setCategoryHighlight] = useState<{ title: string; summary: string }[]>([]);
-  console.log(categoryHighlight);
+
+  const handleIncrementViewCount = (item: NewsPaperWithCategory) => {
+    incrementNewsViewCount(item.id);
+  };
 
   useEffect(() => {
     // 데이터 로드
@@ -88,7 +92,6 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
         setCategoryHighlight([]);
         ['CS', 'EE', 'IT'].forEach(async (categoryGroupName) => {
           const data = await fetchNewsHighlight(categoryGroupName);
-          console.log(data);
           setCategoryHighlight((prev) => [
             ...prev,
             { title: data[0].newspaper.title, summary: data[0].newspaper.summary },
@@ -276,7 +279,11 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
   const renderNewsPaperCard = (item: NewsPaperWithCategory) => {
     const categoryKor = item.category.map((category) => subCategoriesEngToKor(category));
     return (
-      <Link href={`/news-detail?id=${item.id}&type=${item.type}`} key={item.title}>
+      <Link
+        href={`/news-detail?id=${item.id}&type=${item.type}`}
+        key={item.title}
+        onClick={() => handleIncrementViewCount(item)}
+      >
         <div key={item.title} className="bg-white rounded-lg shadow-md p-6 mb-4 hover:bg-gray-50">
           <div className="mb-4">
             <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
