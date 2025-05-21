@@ -140,6 +140,16 @@ export async function patchAlarmEmailOn(): Promise<Response> {
   return response.json();
 }
 
+//뉴스테러 이메일 변경
+export async function patchChangeEmail(email: string): Promise<Response> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/alarms/me/email?email=${email}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+  });
+  return response.json();
+}
+
 // 카카오 알람 ON/OFF 토글
 export async function patchAlarmKakaoOn(): Promise<Response> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/alarms/me/kakao_on`, {
@@ -210,6 +220,15 @@ export async function fetchNewsHighlight(categoryGroupName: string): Promise<New
       credentials: 'include',
     },
   );
+  return response.json();
+}
+
+// 뉴스 조회수 증가
+export async function incrementNewsViewCount(id: number): Promise<Response> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/newspapers/${id}/increment_hits`, {
+    method: 'PATCH',
+    credentials: 'include',
+  });
   return response.json();
 }
 
@@ -412,7 +431,8 @@ const mockAdminStats: AdminStats = {
   totalPapers: 1830,
   crawlingStatus: {
     lastRun: '2025-04-03T08:30:00',
+    nextRun: '2025-04-03T08:30:00',
     success: true,
-    itemsProcessed: 128,
+    totalNumber: 128,
   },
 };

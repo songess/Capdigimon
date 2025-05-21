@@ -9,11 +9,11 @@ import {
   fetchSelectedCategories,
   fetchMyAlarm,
   patchAlarmEmailOn,
-  patchAlarmKakaoOn,
   patchAlarmFrequency,
   patchAlarmDayOfMonth,
   patchAlarmDayOfWeek,
   patchAlarmReceiveTime,
+  patchChangeEmail,
 } from '@/app/api/newsApi';
 import { Check, ChevronRight, ChevronDown, Mail, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -50,8 +50,10 @@ export default function BriefingSettings() {
   const [selectedTime, setSelectedTime] = useState<string>('09:00');
   const [selectedDays, setSelectedDays] = useState<string>('월');
   const [selectedDate, setSelectedDate] = useState<number>(1);
-  const [email, setEmail] = useState<string>('user@example.com');
+  const [email, setEmail] = useState<string>('please fill email');
   const [kakao, setKakao] = useState<string>('아직 어떤 방식으로 연동하는지 모름');
+  const [isEditingEmail, setIsEditingEmail] = useState<boolean>(false);
+  const [isEditingKakao, setIsEditingKakao] = useState<boolean>(false);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -75,6 +77,7 @@ export default function BriefingSettings() {
         setKakaoNotification(alarmData.kakao_on);
         setBriefingFrequency(alarmData.frequency);
         setSelectedTime(alarmData.receive_time);
+        setEmail(alarmData.email || 'please fill email');
 
         if (alarmData.frequency === 'weekly') {
           setSelectedDays(dayMappingEngToKor[alarmData.day_of_week]);
@@ -193,7 +196,7 @@ export default function BriefingSettings() {
 
   const handleKakaoToggle = async () => {
     try {
-      await patchAlarmKakaoOn();
+      // await patchAlarmKakaoOn();
       setKakaoNotification(!kakaoNotification);
       toast.success('카카오톡 알림 설정이 변경되었습니다.');
     } catch (error) {
@@ -244,6 +247,23 @@ export default function BriefingSettings() {
       console.error('시간 변경 중 오류 발생:', error);
       toast.error('시간 변경 중 오류가 발생했습니다.');
     }
+  };
+
+  const handleEmailChange = async () => {
+    try {
+      await patchChangeEmail(email);
+      setIsEditingEmail(false);
+      toast.success('이메일이 변경되었습니다.');
+    } catch (error) {
+      console.error('이메일 변경 중 오류 발생:', error);
+      toast.error('이메일 변경 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleKakaoChange = () => {
+    // TODO: 카카오톡 변경 API 호출
+    setIsEditingKakao(false);
+    toast.success('카카오톡이 변경되었습니다.');
   };
 
   return (
@@ -366,13 +386,26 @@ export default function BriefingSettings() {
 
               {emailNotification && (
                 <div className="ml-7 transition-all duration-300 ease-in-out">
-                  <input
-                    type="email"
-                    placeholder="이메일 주소"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      placeholder="이메일 주소"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={!isEditingEmail}
+                    />
+                    <Button
+                      onClick={() => (isEditingEmail ? handleEmailChange() : setIsEditingEmail(true))}
+                      className={`whitespace-nowrap ${
+                        isEditingEmail
+                          ? 'bg-blue-500 text-white hover:bg-blue-600'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                      }`}
+                    >
+                      {isEditingEmail ? '저장' : '변경'}
+                    </Button>
+                  </div>
                 </div>
               )}
 
@@ -394,13 +427,22 @@ export default function BriefingSettings() {
 
               {kakaoNotification && (
                 <div className="ml-7 transition-all duration-300 ease-in-out">
-                  <input
-                    type="text"
-                    placeholder="카카오톡 주소"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={kakao}
-                    onChange={(e) => setKakao(e.target.value)}
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="카카오톡 주소"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={kakao}
+                      onChange={(e) => setKakao(e.target.value)}
+                      disabled={!isEditingKakao}
+                    />
+                    <Button
+                      onClick={() => (isEditingKakao ? handleKakaoChange() : setIsEditingKakao(true))}
+                      className="whitespace-nowrap"
+                    >
+                      {isEditingKakao ? '저장' : '변경'}
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
