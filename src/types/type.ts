@@ -71,7 +71,7 @@ export interface AdminStats {
 export interface LoginResponse extends Response {
   access_token: string;
   message: string;
-  username: string;
+  user_info: string;
 }
 
 export interface AlarmResponse extends Response {
@@ -83,6 +83,7 @@ export interface AlarmResponse extends Response {
   receive_time: receiveTimeEnum;
   email_on: boolean;
   kakao_on: boolean;
+  email: string;
 }
 
 export type frequencyEnum = 'daily' | 'weekly' | 'monthly';

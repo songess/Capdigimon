@@ -25,7 +25,7 @@ export default function AuthPage() {
       if (isLogin) {
         const response = await fetchLogin(email, password);
         setCookie('access_token', response.access_token);
-        setCookie('username', response.username);
+        setCookie('user_info', response.user_info);
         toast.success('로그인되었습니다.');
         router.push(from);
       } else {

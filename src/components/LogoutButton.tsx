@@ -20,7 +20,7 @@ export function LogoutButton({ className }: LogoutButtonProps) {
 
       // 쿠키 제거
       setCookie('access_token', '', { expires: new Date(0), path: '/' });
-      setCookie('username', '', { expires: new Date(0), path: '/' });
+      setCookie('user_info', '', { expires: new Date(0), path: '/' });
 
       // 홈페이지로 리다이렉트 및 상태 새로고침
       router.push('/');
