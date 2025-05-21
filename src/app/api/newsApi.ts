@@ -9,6 +9,7 @@ import {
   dayOfWeekEnum,
   receiveTimeEnum,
   frequencyEnum,
+  CategoryStats,
 } from '@/types/type';
 
 // 뉴스 데이터 가져오기
@@ -87,7 +88,17 @@ export async function fetchTrends(): Promise<TrendData[]> {
 
 // 관리자 통계 데이터 가져오기
 export async function fetchAdminStats(): Promise<AdminStats> {
-  return mockAdminStats;
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/stat/total-stats`, {
+    credentials: 'include',
+  });
+  return response.json();
+}
+
+export async function fetchCategoryStats(): Promise<CategoryStats[]> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/stat/category-stats`, {
+    credentials: 'include',
+  });
+  return response.json();
 }
 
 export async function fetchSignUp(email: string, password: string, name: string): Promise<Response> {

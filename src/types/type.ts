@@ -57,15 +57,22 @@ export interface TrendData {
 }
 
 export interface AdminStats {
-  totalUsers: number;
-  activeUsers: number;
-  totalNews: number;
-  totalPapers: number;
-  crawlingStatus: {
-    lastRun: string;
-    success: boolean;
-    itemsProcessed: number;
-  };
+  total_users: number;
+  total_news: number;
+  total_papers: number;
+  // crawlingStatus: {
+  //   lastRun: string;
+  //   success: boolean;
+  //   itemsProcessed: number;
+  // };
+}
+
+export interface CategoryStats {
+  category_name: string;
+  news_count: number;
+  paper_count: number;
+  user_count: number;
+  total_hits: number;
 }
 
 export interface LoginResponse extends Response {
