@@ -144,3 +144,5 @@ export type receiveTimeEnum =
   | '21:00'
   | '22:00'
   | '23:00';
+
+export type categoryGroupEnum = 'CS' | 'EE' | 'IT';

@@ -202,6 +202,17 @@ export async function patchAlarmReceiveTime(receiveTime: receiveTimeEnum): Promi
   return response.json();
 }
 
+// 뉴스하이라이트 가져오기
+export async function fetchNewsHighlight(categoryGroupName: string): Promise<NewsPaperResponse[]> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/stat/top-k-hits/group/${categoryGroupName}?k=1`,
+    {
+      credentials: 'include',
+    },
+  );
+  return response.json();
+}
+
 // 목업 데이터
 // const mockNews: NewsPaper[] = [
 //   {

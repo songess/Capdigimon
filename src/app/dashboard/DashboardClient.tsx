@@ -10,6 +10,7 @@ import {
   fetchAllNews,
   fetchAllPapers,
   subCategoriesEngToKor,
+  fetchNewsHighlight,
 } from '@/app/api/newsApi';
 import { fetchSubCategoryTrends, fetchSubCategoryTrendsByCategory } from '@/app/api/subCategoryTrends';
 import {
@@ -51,6 +52,8 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
   const [showSubCategoryTrend, setShowSubCategoryTrend] = useState<boolean>(false);
   const [selectedTrendCategory, setSelectedTrendCategory] = useState<string>('');
   const [chartType, setChartType] = useState<'line' | 'area' | 'bar'>('area');
+  const [categoryHighlight, setCategoryHighlight] = useState<{ title: string; summary: string }[]>([]);
+  console.log(categoryHighlight);
 
   useEffect(() => {
     // 데이터 로드
@@ -82,14 +85,24 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
         setTrends(trendsData);
         setSubCategoryTrends(subCategoryTrendsData);
 
+        setCategoryHighlight([]);
+        ['CS', 'EE', 'IT'].forEach(async (categoryGroupName) => {
+          const data = await fetchNewsHighlight(categoryGroupName);
+          console.log(data);
+          setCategoryHighlight((prev) => [
+            ...prev,
+            { title: data[0].newspaper.title, summary: data[0].newspaper.summary },
+          ]);
+        });
+
         // 검색 결과에 대한 토스트 알림
-        if (selectedCategory || searchKeyword) {
-          const totalResults = activeTab === 'news' ? newsData.length : papersData.length;
-          toast.success(`${totalResults}개의 ${activeTab === 'news' ? '뉴스' : '논문'}를 찾았습니다.`, {
-            duration: 2000,
-            position: 'bottom-center',
-          });
-        }
+        // if (selectedCategory || searchKeyword) {
+        //   const totalResults = activeTab === 'news' ? newsData.length : papersData.length;
+        //   toast.success(`${totalResults}개의 ${activeTab === 'news' ? '뉴스' : '논문'}를 찾았습니다.`, {
+        //     duration: 2000,
+        //     position: 'bottom-center',
+        //   });
+        // }
       } catch (error) {
         console.error('데이터 로드 중 오류 발생:', error);
         toast.error('데이터를 불러오는 중 오류가 발생했습니다.');
@@ -478,22 +491,17 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4">산업별 뉴스 하이라이트</h2>
             <div className="space-y-4">
-              <div className="border-l-4 border-blue-500 pl-4 py-2">
-                <h3 className="font-medium text-gray-900">기술 산업</h3>
-                <p className="text-sm text-gray-600">
-                  인공지능 기술의 발전으로 자동화 시스템이 급속도로 확산되고 있습니다.
-                </p>
-              </div>
-              <div className="border-l-4 border-green-500 pl-4 py-2">
-                <h3 className="font-medium text-gray-900">금융 산업</h3>
-                <p className="text-sm text-gray-600">블록체인 기술을 활용한 새로운 금융 서비스가 등장하고 있습니다.</p>
-              </div>
-              <div className="border-l-4 border-purple-500 pl-4 py-2">
-                <h3 className="font-medium text-gray-900">의료 산업</h3>
-                <p className="text-sm text-gray-600">
-                  바이오 기술의 혁신으로 개인 맞춤형 의료 서비스가 확대되고 있습니다.
-                </p>
-              </div>
+              {categoryHighlight.map((highlight, index) => (
+                <div
+                  key={index}
+                  className={`border-l-4 ${
+                    index === 0 ? 'border-blue-500' : index === 1 ? 'border-green-500' : 'border-purple-500'
+                  } pl-4 py-2`}
+                >
+                  <h3 className="font-medium text-gray-900">{highlight.title}</h3>
+                  <p className="text-sm text-gray-600">{highlight.summary}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
