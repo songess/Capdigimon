@@ -281,7 +281,7 @@ export default function Admin() {
         <div className="space-y-6">
           {/* 크롤링 상태 */}
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">크롤링 상태</h2>
+            <h2 className="text-xl font-semibold mb-4">크롤링 상태(TODO)</h2>
             {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center">
@@ -327,7 +327,7 @@ export default function Admin() {
 
           {/* 크롤링 히스토리 */}
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">크롤링 히스토리</h2>
+            <h2 className="text-xl font-semibold mb-4">크롤링 히스토리(TODO)</h2>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={crawlingHistoryData}>

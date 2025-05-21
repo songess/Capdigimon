@@ -412,7 +412,7 @@ export default function BriefingSettings() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <MessageSquare className="h-5 w-5 text-gray-500 mr-2" />
-                  <span>카카오톡 알림</span>
+                  <span>카카오톡 알림(TODO)</span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input

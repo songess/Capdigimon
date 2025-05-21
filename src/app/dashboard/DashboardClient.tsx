@@ -409,7 +409,7 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold flex items-center">
                 <TrendingUp className="mr-2 h-5 w-5 text-blue-600" />
-                트렌드 분석
+                트렌드 분석(TODO)
               </h2>
               <div className="flex items-center space-x-2">
                 <div className="flex items-center bg-gray-100 rounded-full p-1">
