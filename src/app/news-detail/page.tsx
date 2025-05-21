@@ -170,7 +170,7 @@ function NewsDetailContent() {
                 >
                   {isNews ? '뉴스' : '논문'}
                 </span>
-                <span className="ml-2 text-sm text-gray-500">{`${item.source} | ${item.date}`}</span>
+                <span className="ml-2 text-sm text-gray-500">{`${item.source} | ${item.date.slice(0, 10)}`}</span>
               </div>
               <div className="flex space-x-2">
                 <button
@@ -245,7 +245,7 @@ function NewsDetailContent() {
                     >
                       <h3 className="font-medium text-gray-900 hover:text-blue-600">{related.title}</h3>
                       <p className="text-sm text-gray-600 mt-1 line-clamp-2">{related.summary}</p>
-                      <div className="text-xs text-gray-500 mt-1">{`${related.source} | ${related.date}`}</div>
+                      <div className="text-xs text-gray-500 mt-1">{`${related.source} | ${related.date.slice(0, 10)}`}</div>
                     </Link>
                   </div>
                 ))
