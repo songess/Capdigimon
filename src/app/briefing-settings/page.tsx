@@ -18,6 +18,7 @@ import {
 import { Check, ChevronRight, ChevronDown, Mail, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { dayOfMonthEnum, dayOfWeekEnum, receiveTimeEnum } from '@/types/type';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 const dayMappingKorToEng: { [key: string]: dayOfWeekEnum } = {
   월: 'monday',
@@ -40,6 +41,7 @@ const dayMappingEngToKor: { [key: string]: string } = {
 };
 
 export default function BriefingSettings() {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
@@ -58,6 +60,7 @@ export default function BriefingSettings() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
+        setIsLoading(true);
         const categoriesData = await fetchCategories();
         setCategories(categoriesData);
         const selectedSubCategories = await fetchSelectedCategories();
@@ -87,12 +90,22 @@ export default function BriefingSettings() {
       } catch (error) {
         console.error('알림 설정 로드 중 오류 발생:', error);
         toast.error('알림 설정 로드 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadCategories();
     loadAlarmSettings();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   // 카테고리에 속한 서브 카테고리 중 하나라도 선택되어 있는지 확인하는 함수
   const hasSelectedSubCategories = (category: Category) => {
