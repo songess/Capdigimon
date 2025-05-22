@@ -43,11 +43,13 @@ interface DashboardClientProps {
 
 export default function DashboardClient({ access_token }: DashboardClientProps) {
   const [news, setNews] = useState<NewsPaperWithCategory[]>([]);
+  const [originalNews, setOriginalNews] = useState<NewsPaperWithCategory[]>([]);
   const [papers, setPapers] = useState<NewsPaperWithCategory[]>([]);
+  const [originalPapers, setOriginalPapers] = useState<NewsPaperWithCategory[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [trends, setTrends] = useState<TrendData[]>([]);
   const [subCategoryTrends, setSubCategoryTrends] = useState<TrendData[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  // const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'news' | 'papers'>('news');
   const [showSubCategoryTrend, setShowSubCategoryTrend] = useState<boolean>(false);
@@ -69,22 +71,24 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
         const trendsData = await fetchTrends();
         const subCategoryTrendsData = await fetchSubCategoryTrends();
 
-        setNews(
-          newsData.map((response) => {
-            return {
-              ...response.newspaper,
-              category: response.categories || [],
-            };
-          }) as NewsPaperWithCategory[],
-        );
-        setPapers(
-          papersData.map((response) => {
-            return {
-              ...response.newspaper,
-              category: response.categories || [],
-            };
-          }) as NewsPaperWithCategory[],
-        );
+        const processedNewsData = newsData.map((response) => {
+          return {
+            ...response.newspaper,
+            category: response.categories || [],
+          };
+        }) as NewsPaperWithCategory[];
+
+        const processedPapersData = papersData.map((response) => {
+          return {
+            ...response.newspaper,
+            category: response.categories || [],
+          };
+        }) as NewsPaperWithCategory[];
+
+        setNews(processedNewsData);
+        setOriginalNews(processedNewsData);
+        setPapers(processedPapersData);
+        setOriginalPapers(processedPapersData);
         setCategories(categoriesData);
         setTrends(trendsData);
         setSubCategoryTrends(subCategoryTrendsData);
@@ -113,7 +117,7 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
     };
 
     loadData();
-  }, [selectedCategory, searchKeyword, activeTab, access_token]);
+  }, [activeTab, access_token]);
 
   // 특정 카테고리의 서브 카테고리 트렌드 데이터 로드
   useEffect(() => {
@@ -130,6 +134,20 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
       loadSubCategoryTrends();
     }
   }, [showSubCategoryTrend, selectedTrendCategory]);
+
+  // 키워드 검색 필터링
+  const handleSearchKeywordChange = (keyword: string) => {
+    setSearchKeyword(keyword);
+    if (keyword) {
+      const filteredNews = originalNews.filter((item) => item.title.toLowerCase().includes(keyword.toLowerCase()));
+      const filteredPapers = originalPapers.filter((item) => item.title.toLowerCase().includes(keyword.toLowerCase()));
+      setNews(filteredNews);
+      setPapers(filteredPapers);
+    } else {
+      setNews(originalNews);
+      setPapers(originalPapers);
+    }
+  };
 
   // 트렌드 데이터 변환
   const getChartData = () => {
@@ -324,13 +342,13 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
           <div className="relative">
             <input
               type="text"
-              placeholder="키워드 검색..."
+              placeholder="제목 검색..."
               className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
+              onChange={(e) => handleSearchKeywordChange(e.target.value)}
             />
           </div>
-          <select
+          {/* <select
             className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -341,7 +359,7 @@ export default function DashboardClient({ access_token }: DashboardClientProps) 
                 {category.name}
               </option>
             ))}
-          </select>
+          </select> */}
         </div>
       </div>
 
