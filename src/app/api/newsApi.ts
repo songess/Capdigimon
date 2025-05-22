@@ -13,10 +13,12 @@ import {
 } from '@/types/type';
 
 // 뉴스 데이터 가져오기
-export async function fetchNews(): Promise<NewsPaperResponse[]> {
-  // 실제 프로덕션에서는 실제 API를 사용해야 합니다
+export async function fetchNews(access_token: string): Promise<NewsPaperResponse[]> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/dashboard/me/user-categories?type=news`, {
     credentials: 'include',
+    headers: {
+      Cookie: `access_token=${access_token}`,
+    },
   });
   // const data = await response.json();
   // return data.articles.map(mapToNewsFormat);
@@ -35,12 +37,15 @@ export async function fetchAllNews(): Promise<NewsPaperResponse[]> {
 }
 
 // 논문 데이터 가져오기
-export async function fetchPapers(): Promise<NewsPaperResponse[]> {
+export async function fetchPapers(access_token: string): Promise<NewsPaperResponse[]> {
   // 실제 프로덕션에서는 실제 API를 사용해야 합니다
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/dashboard/me/user-categories?type=paper`,
     {
       credentials: 'include',
+      headers: {
+        Cookie: `access_token=${access_token}`,
+      },
     },
   );
   return response.json();
@@ -49,12 +54,9 @@ export async function fetchPapers(): Promise<NewsPaperResponse[]> {
 // 모든 논문 데이터 가져오기
 export async function fetchAllPapers(): Promise<NewsPaperResponse[]> {
   // 실제 프로덕션에서는 실제 API를 사용해야 합니다
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/dashboard/me/user-categories?type=paper`,
-    {
-      credentials: 'include',
-    },
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/dashboard/?type=paper`, {
+    credentials: 'include',
+  });
   return response.json();
 }
 

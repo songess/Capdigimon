@@ -10,7 +10,7 @@ export async function getAuthStatus() {
   return {
     isAuthenticated: !!accessToken,
     username: username || '',
-  };
+};
 }
 
 export const decodeUserInfo = (token: string): { username: string } => {
