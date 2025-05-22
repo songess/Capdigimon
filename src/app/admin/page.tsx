@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { AdminStats } from '@/types/type';
 import { fetchAdminStats, fetchCategoryStats, subCategoriesEngToKor } from '@/app/api/newsApi';
 import {
@@ -18,7 +17,6 @@ import {
   Cell,
 } from 'recharts';
 import { RefreshCcw, Users, FileText, Settings } from 'lucide-react';
-import toast from 'react-hot-toast';
 
 export default function Admin() {
   const [stats, setStats] = useState<AdminStats | null>(null);

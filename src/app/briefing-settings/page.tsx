@@ -161,18 +161,18 @@ export default function BriefingSettings() {
     }
   };
 
-  const handleSaveSettings = () => {
-    // 실제로는 API를 통해 서버에 저장
-    toast.success('설정이 저장되었습니다.', {
-      icon: '👍',
-      duration: 3000,
-      style: {
-        borderRadius: '10px',
-        background: '#333',
-        color: '#fff',
-      },
-    });
-  };
+  // const handleSaveSettings = () => {
+  //   // 실제로는 API를 통해 서버에 저장
+  //   toast.success('설정이 저장되었습니다.', {
+  //     icon: '👍',
+  //     duration: 3000,
+  //     style: {
+  //       borderRadius: '10px',
+  //       background: '#333',
+  //       color: '#fff',
+  //     },
+  //   });
+  // };
 
   // 카테고리 필터링 함수
   const getFilteredCategories = () => {
