@@ -9,6 +9,7 @@ import { fetchLogin, fetchSignUp } from '../api/newsApi';
 import toast from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { setCookie } from 'cookies-next';
+import { ApiError } from '@/lib/errors';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -34,8 +35,17 @@ export default function AuthPage() {
         router.push('/dashboard');
       }
     } catch (error) {
-      console.error('Auth error:', error);
-      toast.error('오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      if (error instanceof ApiError) {
+        if (isLogin) {
+          toast.error('이메일 또는 비밀번호가 일치하지 않습니다.');
+        } else {
+          if (error.statusCode === 400) {
+            toast.error('이메일이 이미 존재합니다.');
+          } else {
+            toast.error('양식에 맞게 입력해주세요(비밀번호는 8자리 이상)');
+          }
+        }
+      }
     }
   };
 

@@ -11,6 +11,7 @@ import {
   frequencyEnum,
   CategoryStats,
 } from '@/types/type';
+import { ApiError } from '@/lib/errors';
 
 // 뉴스 데이터 가져오기
 export async function fetchNews(access_token: string): Promise<NewsPaperResponse[]> {
@@ -114,7 +115,7 @@ export async function fetchSignUp(email: string, password: string, name: string)
   });
 
   if (!response.ok) {
-    throw new Error('회원가입 실패');
+    throw new ApiError('회원가입 실패', response.status);
   }
   return response.json();
 }
@@ -130,7 +131,7 @@ export async function fetchLogin(email: string, password: string): Promise<Login
   });
 
   if (!response.ok) {
-    throw new Error('로그인 실패');
+    throw new ApiError('로그인 실패', response.status);
   }
   return response.json();
 }
