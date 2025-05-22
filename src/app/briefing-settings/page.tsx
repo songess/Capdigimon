@@ -545,14 +545,14 @@ export default function BriefingSettings() {
           </div>
 
           {/* 저장 버튼 */}
-          <div className="flex justify-end">
+          {/* <div className="flex justify-end">
             <Button
               className="px-6 py-6 text-base transition-all duration-200 hover:shadow-lg"
               onClick={handleSaveSettings}
             >
               설정 저장
             </Button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

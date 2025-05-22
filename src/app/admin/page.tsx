@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { AdminStats, CategoryStats } from '@/types/type';
+import { AdminStats } from '@/types/type';
 import { fetchAdminStats, fetchCategoryStats, subCategoriesEngToKor } from '@/app/api/newsApi';
 import {
   BarChart,
@@ -92,14 +92,14 @@ export default function Admin() {
 
   const COLORS = ['#0088FE', '#00C49F'];
 
-  const categoryDistributionData = [
-    { name: '기술', count: 1250 },
-    { name: '금융', count: 850 },
-    { name: '통신', count: 650 },
-    { name: '에너지', count: 450 },
-    { name: '의료', count: 950 },
-    { name: '인공지능', count: 1130 },
-  ];
+  // const categoryDistributionData = [
+  //   { name: '기술', count: 1250 },
+  //   { name: '금융', count: 850 },
+  //   { name: '통신', count: 650 },
+  //   { name: '에너지', count: 450 },
+  //   { name: '의료', count: 950 },
+  //   { name: '인공지능', count: 1130 },
+  // ];
 
   const crawlingHistoryData = [
     { date: '2025-04-01', 성공: 120, 실패: 5 },
@@ -344,7 +344,7 @@ export default function Admin() {
           </div>
 
           {/* 크롤링 실행 버튼 */}
-          <div className="flex justify-end">
+          {/* <div className="flex justify-end">
             <Button
               className="px-6 py-6 text-base"
               onClick={() => {
@@ -362,7 +362,7 @@ export default function Admin() {
               <RefreshCcw className="mr-2 h-5 w-5" />
               크롤링 실행
             </Button>
-          </div>
+          </div> */}
         </div>
       )}
     </div>

@@ -435,15 +435,15 @@ const mockTrends: TrendData[] = [
   { date: '2025-04', keyword: '5G', count: 100 },
 ];
 
-const mockAdminStats: AdminStats = {
-  totalUsers: 1250,
-  activeUsers: 850,
-  totalNews: 5280,
-  totalPapers: 1830,
-  crawlingStatus: {
-    lastRun: '2025-04-03T08:30:00',
-    nextRun: '2025-04-03T08:30:00',
-    success: true,
-    totalNumber: 128,
-  },
-};
+// const mockAdminStats: AdminStats = {
+//   totalUsers: 1250,
+//   activeUsers: 850,
+//   totalNews: 5280,
+//   totalPapers: 1830,
+//   crawlingStatus: {
+//     lastRun: '2025-04-03T08:30:00',
+//     nextRun: '2025-04-03T08:30:00',
+//     success: true,
+//     totalNumber: 128,
+//   },
+// };
