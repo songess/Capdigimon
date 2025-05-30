@@ -1,5 +1,3 @@
-import { Newspaper } from 'lucide-react';
-
 export interface NewsPaper {
   summary: string;
   title: string;
@@ -111,6 +109,15 @@ export interface AlarmResponse extends Response {
 export interface KeywordSearchResponse {
   keyword: string;
   contexts: string;
+}
+
+export interface SchedulerState {
+  state: 'RUNNING' | 'PAUSED' | 'STOPPED';
+  next_run_time: string;
+  next_newsletter_send_time: string;
+  next_news_update_time: string;
+  next_trend_data_update_time: string;
+  next_paper_update_time: string;
 }
 
 export type frequencyEnum = 'daily' | 'weekly' | 'monthly';

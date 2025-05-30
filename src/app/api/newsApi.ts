@@ -13,6 +13,7 @@ import {
   KeywordSearchResponse,
   CrawlingHistory,
   RecommendContentResponse,
+  SchedulerState,
 } from '@/types/type';
 import { ApiError } from '@/lib/errors';
 
@@ -279,6 +280,23 @@ export async function fetchRelatedNews(id: number, type: string): Promise<{ resu
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
+  });
+  return response.json();
+}
+
+// 스케쥴러 상태 가져오기
+export async function fetchSchedulerState(): Promise<SchedulerState> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/sched/status`, {
+    credentials: 'include',
+  });
+  return response.json();
+}
+
+// 수동 크롤링
+export async function fetchManualCrawling({ type }: { type: string }): Promise<Response> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/sched/update-contents?type=${type}`, {
+    method: 'POST',
     credentials: 'include',
   });
   return response.json();

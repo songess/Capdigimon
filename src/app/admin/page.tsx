@@ -1,8 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AdminStats, CrawlingHistory } from '@/types/type';
-import { fetchAdminStats, fetchCategoryStats, fetchCrawlingHistory, subCategoriesEngToKor } from '@/app/api/newsApi';
+import { AdminStats, CrawlingHistory, SchedulerState } from '@/types/type';
+import {
+  fetchAdminStats,
+  fetchCategoryStats,
+  fetchCrawlingHistory,
+  fetchManualCrawling,
+  fetchSchedulerState,
+  subCategoriesEngToKor,
+} from '@/app/api/newsApi';
 import {
   BarChart,
   Bar,
@@ -16,13 +23,16 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { RefreshCcw, Users, FileText, Settings, AlertCircle } from 'lucide-react';
+import { RefreshCcw, Users, FileText, Settings, AlertCircle, Play, Pause } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Button } from '@/components/ui/button';
+import toast from 'react-hot-toast';
 
 export default function Admin() {
   const [stats, setStats] = useState<AdminStats | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'crawling'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'crawling' | 'scheduler'>('overview');
   const [loading, setLoading] = useState(true);
+  const [schedulerState, setSchedulerState] = useState<SchedulerState | null>(null);
   const [newsCount, setNewsCount] = useState(0);
   const [papersCount, setPapersCount] = useState(0);
   const [newsCountData, setNewsCountData] = useState<{ name: string; count: number }[]>([]);
@@ -40,11 +50,12 @@ export default function Admin() {
         const statsData = await fetchAdminStats();
         const crawlingHistoryNewsData = await fetchCrawlingHistory('news');
         const crawlingHistoryPaperData = await fetchCrawlingHistory('paper');
-        console.log(crawlingHistoryNewsData);
-        console.log(crawlingHistoryPaperData);
+        const schedulerStateData = await fetchSchedulerState();
+
         setStats(statsData);
         setCrawlingHistoryNews(crawlingHistoryNewsData.slice(0, 3));
         setCrawlingHistoryPaper(crawlingHistoryPaperData.slice(0, 3));
+        setSchedulerState(schedulerStateData);
 
         // 뉴스 및 논문 데이터 가져오기
         setNewsCount(statsData.total_news);
@@ -143,6 +154,17 @@ export default function Admin() {
           >
             <RefreshCcw className="mr-2 h-5 w-5" />
             크롤링 모니터링
+          </button>
+          <button
+            className={`mr-8 py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
+              activeTab === 'scheduler'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+            onClick={() => setActiveTab('scheduler')}
+          >
+            <Settings className="mr-2 h-5 w-5" />
+            스케줄러 관리
           </button>
         </div>
       </div>
@@ -428,7 +450,12 @@ export default function Admin() {
                     }}
                   />
                   <YAxis />
-                  <Tooltip />
+                  <Tooltip
+                    labelFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}시`;
+                    }}
+                  />
                   <Legend />
                   <Bar dataKey="success" name="성공" fill="#82ca9d" />
                   <Bar dataKey="error_403" name="403 에러" fill="#ff8042" />
@@ -459,6 +486,151 @@ export default function Admin() {
               크롤링 실행
             </Button>
           </div> */}
+        </div>
+      )}
+
+      {/* 스케줄러 관리 */}
+      {activeTab === 'scheduler' && (
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-semibold">스케줄러 상태</h2>
+                <div className="mt-2 flex items-center">
+                  <div
+                    className={`w-3 h-3 rounded-full mr-2 ${
+                      schedulerState?.state === 'RUNNING'
+                        ? 'bg-green-500'
+                        : schedulerState?.state === 'PAUSED'
+                        ? 'bg-yellow-500'
+                        : 'bg-red-500'
+                    }`}
+                  />
+                  <span className="text-gray-600">
+                    {schedulerState?.state === 'RUNNING'
+                      ? '실행 중'
+                      : schedulerState?.state === 'PAUSED'
+                      ? '일시 중지'
+                      : '중지됨'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex space-x-4">
+                <Button
+                  variant={schedulerState?.state === 'RUNNING' ? 'destructive' : 'default'}
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/scheduler/pause', { method: 'POST' });
+                      if (response.ok) {
+                        const newState = await response.json();
+                        setSchedulerState(newState);
+                        toast.success('스케줄러가 일시 중지되었습니다.');
+                      }
+                    } catch {
+                      toast.error('스케줄러 상태 변경 중 오류가 발생했습니다.');
+                    }
+                  }}
+                  // disabled={schedulerState?.state !== 'RUNNING'}
+                  disabled={true}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Pause className="mr-2 h-5 w-5" />
+                  일시 중지
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/scheduler/resume', { method: 'POST' });
+                      if (response.ok) {
+                        const newState = await response.json();
+                        setSchedulerState(newState);
+                        toast.success('스케줄러가 재개되었습니다.');
+                      }
+                    } catch {
+                      toast.error('스케줄러 상태 변경 중 오류가 발생했습니다.');
+                    }
+                  }}
+                  // disabled={schedulerState?.state === 'RUNNING'}
+                  disabled={true}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Play className="mr-2 h-5 w-5" />
+                  재개
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="border border-gray-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-4">다음 실행 일정</h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">뉴스 업데이트</span>
+                    <span className="font-medium">
+                      {new Date(schedulerState?.next_news_update_time || '').toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">논문 업데이트</span>
+                    <span className="font-medium">
+                      {new Date(schedulerState?.next_paper_update_time || '').toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">트렌드 데이터 업데이트</span>
+                    <span className="font-medium">
+                      {new Date(schedulerState?.next_trend_data_update_time || '').toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">뉴스레터 발송</span>
+                    <span className="font-medium">
+                      {new Date(schedulerState?.next_newsletter_send_time || '').toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border border-gray-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-4">수동 크롤링 실행</h3>
+                <div className="space-y-4">
+                  <Button
+                    className="w-full cursor-pointer"
+                    onClick={async () => {
+                      try {
+                        const response = await fetchManualCrawling({ type: 'news' });
+                        if (response.ok) {
+                          toast.success('뉴스 크롤링이 시작되었습니다.');
+                        }
+                      } catch {
+                        toast.error('뉴스 크롤링 시작 중 오류가 발생했습니다.');
+                      }
+                    }}
+                  >
+                    <RefreshCcw className="mr-2 h-5 w-5" />
+                    뉴스 크롤링 실행
+                  </Button>
+                  <Button
+                    className="w-full cursor-pointer"
+                    onClick={async () => {
+                      try {
+                        const response = await fetchManualCrawling({ type: 'paper' });
+                        if (response.ok) {
+                          toast.success('논문 크롤링이 시작되었습니다.');
+                        }
+                      } catch {
+                        toast.error('논문 크롤링 시작 중 오류가 발생했습니다.');
+                      }
+                    }}
+                  >
+                    <RefreshCcw className="mr-2 h-5 w-5" />
+                    논문 크롤링 실행
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
