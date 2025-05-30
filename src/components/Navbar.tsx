@@ -1,9 +1,8 @@
 'use client';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { AuthStatus } from './AuthStatus';
 import { MobileAuthStatus } from './MobileAuthStatus';
-import { useEffect } from 'react';
 
 interface NavbarProps {
   isAuthenticated: boolean;
