@@ -1,3 +1,5 @@
+import { Newspaper } from 'lucide-react';
+
 export interface NewsPaper {
   summary: string;
   title: string;
@@ -14,6 +16,10 @@ export interface NewsPaper {
 export interface NewsPaperResponse {
   newspaper: NewsPaper;
   categories: string[];
+}
+
+export interface RecommendContentResponse extends NewsPaper {
+  sim_score: number;
 }
 
 export interface User {

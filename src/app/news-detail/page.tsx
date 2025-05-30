@@ -4,11 +4,10 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { NewsPaper } from '@/types/type';
-import { fetchAllNews, fetchAllPapers, fetchKeywordSearch } from '@/app/api/newsApi';
+import { fetchAllNews, fetchAllPapers, fetchKeywordSearch, fetchRelatedNews } from '@/app/api/newsApi';
 import { ArrowLeft, ExternalLink, Share2, Bookmark } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { extractEntities, Entity } from '@/utils/entityExtractor';
 import EntityCard from '@/components/EntityCard';
 
 // 검색 파라미터를 사용하는 컴포넌트
@@ -59,7 +58,7 @@ function NewsDetailContent() {
         if (type === 'news') {
           // 뉴스 데이터 가져오기
           const newsData = await fetchAllNews();
-          const selectedNews = newsData.find((news) => news.newspaper.id === Number(id));
+          const selectedNews = newsData.find((news) => news.newspaper.id !== Number(id));
           if (selectedNews) {
             setItem(selectedNews.newspaper);
             const keywordData = await fetchKeywordSearch(selectedNews.newspaper.contents);
@@ -67,16 +66,10 @@ function NewsDetailContent() {
             setContexts(keywordData.contexts);
 
             // 관련 뉴스 가져오기 (같은 카테고리의 다른 뉴스)
-            const related = newsData
-              .filter(
-                (news) =>
-                  news.newspaper.id !== Number(id) &&
-                  news.categories.some((cat) => selectedNews.categories.includes(cat)),
-              )
-              .map((news) => news.newspaper)
-              .slice(0, 3);
-            if (related.length > 0) {
-              setRelatedItems(related);
+            const related = await fetchRelatedNews(Number(id), 'news');
+            const renderRelated = related.results.filter((news) => news.sim_score !== 1).slice(0, 3);
+            if (renderRelated.length > 0) {
+              setRelatedItems(renderRelated);
             }
           }
         } else {
@@ -90,16 +83,10 @@ function NewsDetailContent() {
             setContexts(keywordData.contexts);
 
             // 관련 논문 가져오기 (같은 카테고리의 다른 논문)
-            const related = papersData
-              .filter(
-                (paper) =>
-                  paper.newspaper.id !== Number(id) &&
-                  paper.categories.some((cat) => selectedPaper.categories.includes(cat)),
-              )
-              .map((paper) => paper.newspaper)
-              .slice(0, 3);
-            if (related.length > 0) {
-              setRelatedItems(related);
+            const related = await fetchRelatedNews(Number(id), 'paper');
+            const renderRelated = related.results.filter((paper) => paper.sim_score !== 1).slice(0, 3);
+            if (renderRelated.length > 0) {
+              setRelatedItems(renderRelated);
             }
           }
         }
