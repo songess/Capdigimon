@@ -12,16 +12,6 @@ interface NavbarProps {
 
 export default function Navbar({ isAuthenticated, username }: NavbarProps) {
   const pathname = usePathname();
-  const router = useRouter();
-
-  useEffect(() => {
-    // 주기적으로 서버 컴포넌트의 데이터를 새로고침
-    const interval = setInterval(() => {
-      router.refresh();
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [router]);
 
   return (
     <nav className="bg-white border-b border-gray-200 fixed w-full z-10">

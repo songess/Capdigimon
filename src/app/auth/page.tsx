@@ -29,6 +29,7 @@ export default function AuthPage() {
         setCookie('user_info', response.user_info);
         toast.success('로그인되었습니다.');
         router.push(from);
+        router.refresh();
       } else {
         await fetchSignUp(email, password, name);
         toast.success('회원가입이 완료되었습니다.');
