@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AdminStats } from '@/types/type';
-import { fetchAdminStats, fetchCategoryStats, subCategoriesEngToKor } from '@/app/api/newsApi';
+import { AdminStats, CrawlingHistory } from '@/types/type';
+import { fetchAdminStats, fetchCategoryStats, fetchCrawlingHistory, subCategoriesEngToKor } from '@/app/api/newsApi';
 import {
   BarChart,
   Bar,
@@ -16,7 +16,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { RefreshCcw, Users, FileText, Settings } from 'lucide-react';
+import { RefreshCcw, Users, FileText, Settings, AlertCircle } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export default function Admin() {
@@ -29,13 +29,22 @@ export default function Admin() {
   const [paperCountData, setPaperCountData] = useState<{ name: string; count: number }[]>([]);
   const [userCountData, setUserCountData] = useState<{ name: string; count: number }[]>([]);
   const [totalHitsData, setTotalHitsData] = useState<{ name: string; count: number }[]>([]);
+  const [crawlingType, setCrawlingType] = useState<'news' | 'paper'>('news');
+  const [crawlingHistoryNews, setCrawlingHistoryNews] = useState<CrawlingHistory[]>([]);
+  const [crawlingHistoryPaper, setCrawlingHistoryPaper] = useState<CrawlingHistory[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
         const statsData = await fetchAdminStats();
+        const crawlingHistoryNewsData = await fetchCrawlingHistory('news');
+        const crawlingHistoryPaperData = await fetchCrawlingHistory('paper');
+        console.log(crawlingHistoryNewsData);
+        console.log(crawlingHistoryPaperData);
         setStats(statsData);
+        setCrawlingHistoryNews(crawlingHistoryNewsData.slice(0, 3));
+        setCrawlingHistoryPaper(crawlingHistoryPaperData.slice(0, 3));
 
         // 뉴스 및 논문 데이터 가져오기
         setNewsCount(statsData.total_news);
@@ -88,21 +97,6 @@ export default function Admin() {
   ];
 
   const COLORS = ['#0088FE', '#00C49F'];
-
-  // const categoryDistributionData = [
-  //   { name: '기술', count: 1250 },
-  //   { name: '금융', count: 850 },
-  //   { name: '통신', count: 650 },
-  //   { name: '에너지', count: 450 },
-  //   { name: '의료', count: 950 },
-  //   { name: '인공지능', count: 1130 },
-  // ];
-
-  const crawlingHistoryData = [
-    { date: '2025-04-01', 성공: 120, 실패: 5 },
-    { date: '2025-04-02', 성공: 115, 실패: 8 },
-    { date: '2025-04-03', 성공: 128, 실패: 3 },
-  ];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -278,8 +272,28 @@ export default function Admin() {
         <div className="space-y-6">
           {/* 크롤링 상태 */}
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">크롤링 상태(TODO)</h2>
-            {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">크롤링 상태</h2>
+              <div className="flex space-x-2">
+                <button
+                  className={`px-4 py-2 rounded-md ${
+                    crawlingType === 'news' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                  }`}
+                  onClick={() => setCrawlingType('news')}
+                >
+                  뉴스
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-md ${
+                    crawlingType === 'paper' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                  }`}
+                  onClick={() => setCrawlingType('paper')}
+                >
+                  논문
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center">
                   <div className="p-3 rounded-full bg-blue-100 text-blue-600">
@@ -287,35 +301,94 @@ export default function Admin() {
                   </div>
                   <div className="ml-4">
                     <h3 className="text-gray-500 text-sm">마지막 실행</h3>
-                    <p className="text-lg font-semibold">{new Date(stats.crawlingStatus.lastRun).toLocaleString()}</p>
+                    <p className="text-lg font-semibold">
+                      {crawlingType === 'news'
+                        ? new Date(crawlingHistoryNews[0]?.crawl_time || '').toLocaleString()
+                        : new Date(crawlingHistoryPaper[0]?.crawl_time || '').toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </div>
               <div className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center">
-                  {stats.crawlingStatus.success ? (
-                    <div className="p-3 rounded-full bg-green-100 text-green-600">
-                      <CheckCircle className="h-6 w-6" />
-                    </div>
-                  ) : (
-                    <div className="p-3 rounded-full bg-red-100 text-red-600">
-                      <AlertCircle className="h-6 w-6" />
-                    </div>
-                  )}
-                  <div className="ml-4">
-                    <h3 className="text-gray-500 text-sm">상태</h3>
-                    <p className="text-lg font-semibold">{stats.crawlingStatus.success ? '성공' : '실패'}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-purple-100 text-purple-600">
+                  <div className="p-3 rounded-full bg-green-100 text-green-600">
                     <FileText className="h-6 w-6" />
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-gray-500 text-sm">처리된 항목</h3>
-                    <p className="text-lg font-semibold">{stats.crawlingStatus.itemsProcessed}</p>
+                    <h3 className="text-gray-500 text-sm">성공</h3>
+                    <p className="text-lg font-semibold">
+                      {crawlingType === 'news'
+                        ? crawlingHistoryNews[0]?.success || 0
+                        : crawlingHistoryPaper[0]?.success || 0}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="p-3 rounded-full bg-red-100 text-red-600">
+                    <AlertCircle className="h-6 w-6" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-gray-500 text-sm">총 에러</h3>
+                    <p className="text-lg font-semibold">
+                      {crawlingType === 'news'
+                        ? (crawlingHistoryNews[0]?.error_403 || 0) +
+                          (crawlingHistoryNews[0]?.error_etc || 0) +
+                          (crawlingHistoryNews[0]?.unexpected_category || 0)
+                        : (crawlingHistoryPaper[0]?.error_403 || 0) +
+                          (crawlingHistoryPaper[0]?.error_etc || 0) +
+                          (crawlingHistoryPaper[0]?.unexpected_category || 0)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 에러 상세 정보 */}
+            {/* <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="p-3 rounded-full bg-orange-100 text-orange-600">
+                    <AlertCircle className="h-6 w-6" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-gray-500 text-sm">403 에러</h3>
+                    <p className="text-lg font-semibold">
+                      {crawlingType === 'news'
+                        ? crawlingHistoryNews[0]?.error_403 || 0
+                        : crawlingHistoryPaper[0]?.error_403 || 0}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                    <AlertCircle className="h-6 w-6" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-gray-500 text-sm">예상치 못한 카테고리</h3>
+                    <p className="text-lg font-semibold">
+                      {crawlingType === 'news'
+                        ? crawlingHistoryNews[0]?.unexpected_category || 0
+                        : crawlingHistoryPaper[0]?.unexpected_category || 0}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="p-3 rounded-full bg-red-100 text-red-600">
+                    <AlertCircle className="h-6 w-6" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-gray-500 text-sm">기타 에러</h3>
+                    <p className="text-lg font-semibold">
+                      {crawlingType === 'news'
+                        ? crawlingHistoryNews[0]?.error_etc || 0
+                        : crawlingHistoryPaper[0]?.error_etc || 0}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -324,17 +397,28 @@ export default function Admin() {
 
           {/* 크롤링 히스토리 */}
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">크롤링 히스토리(TODO)</h2>
+            <h2 className="text-xl font-semibold mb-4">크롤링 히스토리</h2>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={crawlingHistoryData}>
+                <BarChart
+                  data={crawlingType === 'news' ? crawlingHistoryNews : crawlingHistoryPaper}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
+                  <XAxis
+                    dataKey="crawl_time"
+                    tickFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}시`;
+                    }}
+                  />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="성공" fill="#82ca9d" />
-                  <Bar dataKey="실패" fill="#ff8042" />
+                  <Bar dataKey="success" name="성공" fill="#82ca9d" />
+                  <Bar dataKey="error_403" name="403 에러" fill="#ff8042" />
+                  <Bar dataKey="unexpected_category" name="예상치 못한 카테고리" fill="#8884d8" />
+                  <Bar dataKey="error_etc" name="기타 에러" fill="#ffc658" />
                 </BarChart>
               </ResponsiveContainer>
             </div>

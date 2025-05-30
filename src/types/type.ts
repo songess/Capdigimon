@@ -67,6 +67,15 @@ export interface AdminStats {
   // };
 }
 
+export interface CrawlingHistory {
+  crawl_time: string;
+  error_403: number;
+  unexpected_category: number;
+  type: string;
+  success: number;
+  error_etc: number;
+}
+
 export interface CategoryStats {
   category_name: string;
   news_count: number;

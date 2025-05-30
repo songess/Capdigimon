@@ -11,6 +11,7 @@ import {
   frequencyEnum,
   CategoryStats,
   KeywordSearchResponse,
+  CrawlingHistory,
 } from '@/types/type';
 import { ApiError } from '@/lib/errors';
 
@@ -96,6 +97,14 @@ export async function fetchTrends(): Promise<TrendData[]> {
 // 관리자 통계 데이터 가져오기
 export async function fetchAdminStats(): Promise<AdminStats> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/stat/total-stats`, {
+    credentials: 'include',
+  });
+  return response.json();
+}
+
+// 크롤링 히스토리 데이터 가져오기
+export async function fetchCrawlingHistory(type: string): Promise<CrawlingHistory[]> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/stat/crawl-log-${type}`, {
     credentials: 'include',
   });
   return response.json();
