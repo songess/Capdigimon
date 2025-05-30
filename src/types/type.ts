@@ -51,9 +51,9 @@ export interface Keyword {
 }
 
 export interface TrendData {
-  date: string;
-  keyword: string;
-  count: number;
+  hits_sum: number;
+  group_category: string;
+  record_date: string;
 }
 
 export interface AdminStats {

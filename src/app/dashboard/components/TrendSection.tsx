@@ -20,25 +20,22 @@ import {
 
 interface TrendSectionProps {
   trends: TrendData[];
-  subCategoryTrends: TrendData[];
   categories: Category[];
 }
 
-export default function TrendSection({ trends, subCategoryTrends, categories }: TrendSectionProps) {
-  const [showSubCategoryTrend, setShowSubCategoryTrend] = useState<boolean>(false);
-  const [selectedTrendCategory, setSelectedTrendCategory] = useState<string>('');
+export default function TrendSection({ trends }: TrendSectionProps) {
   const [chartType, setChartType] = useState<'line' | 'area' | 'bar'>('area');
 
   const getChartData = () => {
-    const sourceData = showSubCategoryTrend ? subCategoryTrends : trends;
+    const sourceData = trends;
 
     return sourceData.reduce((acc: Array<{ date: string; [key: string]: number | string }>, curr) => {
-      const existingDate = acc.find((item) => item.date === curr.date);
+      const existingDate = acc.find((item) => item.date === curr.record_date);
       if (existingDate) {
-        existingDate[curr.keyword] = curr.count;
+        existingDate[curr.group_category] = curr.hits_sum;
       } else {
-        const newItem: { date: string; [key: string]: number | string } = { date: curr.date };
-        newItem[curr.keyword] = curr.count;
+        const newItem: { date: string; [key: string]: number | string } = { date: curr.record_date };
+        newItem[curr.group_category] = curr.hits_sum;
         acc.push(newItem);
       }
       return acc;
@@ -48,8 +45,7 @@ export default function TrendSection({ trends, subCategoryTrends, categories }: 
   const chartData = getChartData();
 
   const getKeywordList = () => {
-    const sourceData = showSubCategoryTrend ? subCategoryTrends : trends;
-    return [...new Set(sourceData.map((trend) => trend.keyword))];
+    return [...new Set(trends.map((trend) => trend.group_category))];
   };
 
   const keywordList = getKeywordList();
@@ -176,24 +172,7 @@ export default function TrendSection({ trends, subCategoryTrends, categories }: 
           트렌드 분석
         </h2>
         <div className="flex items-center space-x-2">
-          <div className="flex items-center bg-gray-100 rounded-full p-1">
-            <button
-              className={`flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                !showSubCategoryTrend ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
-              } transition-all duration-200`}
-              onClick={() => setShowSubCategoryTrend(false)}
-            >
-              카테고리
-            </button>
-            <button
-              className={`flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                showSubCategoryTrend ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'
-              } transition-all duration-200`}
-              onClick={() => setShowSubCategoryTrend(true)}
-            >
-              서브 카테고리
-            </button>
-          </div>
+
           <div className="relative group">
             <button className="p-1 rounded-md hover:bg-gray-100">
               <BarChart2 className="h-5 w-5 text-gray-500" />
@@ -231,23 +210,6 @@ export default function TrendSection({ trends, subCategoryTrends, categories }: 
           </div>
         </div>
       </div>
-
-      {showSubCategoryTrend && (
-        <div className="mb-4">
-          <select
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            value={selectedTrendCategory}
-            onChange={(e) => setSelectedTrendCategory(e.target.value)}
-          >
-            <option value="">카테고리 선택</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.name}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
 
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">

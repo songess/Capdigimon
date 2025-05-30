@@ -87,7 +87,10 @@ export async function fetchCategoryToggle(subCategoryId: string): Promise<Respon
 
 // 키워드 트렌드 데이터 가져오기
 export async function fetchTrends(): Promise<TrendData[]> {
-  return mockTrends;
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/stat/trend-data`, {
+    credentials: 'include',
+  });
+  return response.json();
 }
 
 // 관리자 통계 데이터 가져오기
@@ -436,21 +439,6 @@ export function subCategoriesEngToKor(engId: string): string {
   }
   return '알 수 없는 카테고리';
 }
-
-const mockTrends: TrendData[] = [
-  { date: '2025-01', keyword: '인공지능', count: 120 },
-  { date: '2025-01', keyword: '블록체인', count: 80 },
-  { date: '2025-01', keyword: '5G', count: 60 },
-  { date: '2025-02', keyword: '인공지능', count: 150 },
-  { date: '2025-02', keyword: '블록체인', count: 90 },
-  { date: '2025-02', keyword: '5G', count: 70 },
-  { date: '2025-03', keyword: '인공지능', count: 200 },
-  { date: '2025-03', keyword: '블록체인', count: 110 },
-  { date: '2025-03', keyword: '5G', count: 85 },
-  { date: '2025-04', keyword: '인공지능', count: 250 },
-  { date: '2025-04', keyword: '블록체인', count: 130 },
-  { date: '2025-04', keyword: '5G', count: 100 },
-];
 
 // const mockAdminStats: AdminStats = {
 //   totalUsers: 1250,
