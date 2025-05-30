@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { NewsPaper } from '@/types/type';
-import { fetchAllNews, fetchAllPapers } from '@/app/api/newsApi';
+import { fetchAllNews, fetchAllPapers, fetchKeywordSearch } from '@/app/api/newsApi';
 import { ArrowLeft, ExternalLink, Share2, Bookmark } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -18,6 +18,8 @@ function NewsDetailContent() {
   const type = searchParams.get('type') || 'news';
 
   const [item, setItem] = useState<NewsPaper | null>(null);
+  const [keyword, setKeyword] = useState<string>('');
+  const [contexts, setContexts] = useState<string>('');
   const [relatedItems, setRelatedItems] = useState<NewsPaper[]>([
     {
       id: 1,
@@ -44,7 +46,6 @@ function NewsDetailContent() {
       type: 'paper',
     },
   ]);
-  const [entities, setEntities] = useState<Entity[]>([]);
   const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
 
@@ -61,13 +62,9 @@ function NewsDetailContent() {
           const selectedNews = newsData.find((news) => news.newspaper.id === Number(id));
           if (selectedNews) {
             setItem(selectedNews.newspaper);
-
-            // 중요 엔티티 추출
-            const extractedEntities = extractEntities(
-              selectedNews.newspaper.contents + ' ' + selectedNews.newspaper.summary,
-              selectedNews.categories || [],
-            );
-            setEntities(extractedEntities);
+            const keywordData = await fetchKeywordSearch(selectedNews.newspaper.contents);
+            setKeyword(keywordData.keyword);
+            setContexts(keywordData.contexts);
 
             // 관련 뉴스 가져오기 (같은 카테고리의 다른 뉴스)
             const related = newsData
@@ -88,10 +85,9 @@ function NewsDetailContent() {
           const selectedPaper = papersData.find((paper) => paper.newspaper.id === Number(id));
           if (selectedPaper) {
             setItem(selectedPaper.newspaper);
-
-            // 중요 엔티티 추출
-            const extractedEntities = extractEntities(selectedPaper.newspaper.contents, selectedPaper.categories || []);
-            setEntities(extractedEntities);
+            const keywordData = await fetchKeywordSearch(selectedPaper.newspaper.contents);
+            setKeyword(keywordData.keyword);
+            setContexts(keywordData.contexts);
 
             // 관련 논문 가져오기 (같은 카테고리의 다른 논문)
             const related = papersData
@@ -224,14 +220,7 @@ function NewsDetailContent() {
 
         <div className="space-y-6">
           {/* 중요 엔티티 정보 카드 */}
-          {entities.length > 0 && (
-            <div className="space-y-4">
-              {entities.map((entity, index) => (
-                <EntityCard key={index} entity={entity} />
-              ))}
-            </div>
-          )}
-
+          <EntityCard keyword={keyword} contexts={contexts} />
           {/* AI 추천 관련 기사/논문 */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4">AI 추천 관련 {isNews ? '기사' : '논문'}</h2>
@@ -245,7 +234,10 @@ function NewsDetailContent() {
                     >
                       <h3 className="font-medium text-gray-900 hover:text-blue-600">{related.title}</h3>
                       <p className="text-sm text-gray-600 mt-1 line-clamp-2">{related.summary}</p>
-                      <div className="text-xs text-gray-500 mt-1">{`${related.source} | ${related.date.slice(0, 10)}`}</div>
+                      <div className="text-xs text-gray-500 mt-1">{`${related.source} | ${related.date.slice(
+                        0,
+                        10,
+                      )}`}</div>
                     </Link>
                   </div>
                 ))

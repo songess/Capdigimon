@@ -10,6 +10,7 @@ import {
   receiveTimeEnum,
   frequencyEnum,
   CategoryStats,
+  KeywordSearchResponse,
 } from '@/types/type';
 import { ApiError } from '@/lib/errors';
 
@@ -241,6 +242,19 @@ export async function fetchNewsHighlight(categoryGroupName: string): Promise<New
 export async function incrementNewsViewCount(id: number): Promise<Response> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/api/newspapers/${id}/increment_hits`, {
     method: 'PATCH',
+    credentials: 'include',
+  });
+  return response.json();
+}
+
+// 키워드 탐색
+export async function fetchKeywordSearch(keyword: string): Promise<KeywordSearchResponse> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_AI_DOMAIN}/api/direct_api/keyword`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ content: keyword }),
     credentials: 'include',
   });
   return response.json();

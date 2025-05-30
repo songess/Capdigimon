@@ -93,6 +93,11 @@ export interface AlarmResponse extends Response {
   email: string;
 }
 
+export interface KeywordSearchResponse {
+  keyword: string;
+  contexts: string;
+}
+
 export type frequencyEnum = 'daily' | 'weekly' | 'monthly';
 export type dayOfWeekEnum = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
 export type dayOfMonthEnum =
