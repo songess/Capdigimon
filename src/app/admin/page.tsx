@@ -56,10 +56,25 @@ export default function Admin() {
           name: subCategoriesEngToKor(data.category_name),
           count: data.news_count,
         }));
-        const paperCountData = categoryStatsData.map((data) => ({
-          name: subCategoriesEngToKor(data.category_name),
-          count: data.paper_count,
-        }));
+        const paperCountData = categoryStatsData
+          .map((data) => ({
+            name: subCategoriesEngToKor(data.category_name),
+            count: data.paper_count,
+          }))
+          .filter((data) => {
+            return !(
+              data.name === '퀄컴' ||
+              data.name === '미디어텍' ||
+              data.name === '애플' ||
+              data.name === '샤오미' ||
+              data.name === '비보' ||
+              data.name === 'OPPO' ||
+              data.name === '화웨이' ||
+              data.name === '스냅드래곤' ||
+              data.name === '디멘시티' ||
+              data.name === '키린'
+            );
+          });
         const userCountData = categoryStatsData.map((data) => ({
           name: subCategoriesEngToKor(data.category_name),
           count: data.user_count,
@@ -219,7 +234,7 @@ export default function Admin() {
 
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4">카테고리별 논문 분포</h2>
-            <div className="h-[900px]">
+            <div className="h-[600px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={paperCountData} layout="vertical" margin={{ top: 5, right: 30, left: 150, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
