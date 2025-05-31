@@ -11,7 +11,7 @@ interface Props {
 export default function RelatedItemsSection({ items, type }: Props) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">관련 {type === 'news' ? '기사' : '논문'} 추천</h2>
+      <h2 className="text-xl font-semibold mb-4">관련 {type === 'news' ? '뉴스' : '논문'} 추천</h2>
       <div className="space-y-4">
         {items.length > 0 ? (
           items.map((item) => (
@@ -22,7 +22,9 @@ export default function RelatedItemsSection({ items, type }: Props) {
               >
                 <h3 className="font-medium text-gray-900 hover:text-blue-600">{item.title}</h3>
                 <p className="text-sm text-gray-600 mt-1 line-clamp-2">{item.summary}</p>
-                <div className="text-xs text-gray-500 mt-1">{`${item.source} | ${item.date.slice(0, 10)}`}</div>
+                <div className="text-xs text-gray-500 mt-1">{`${item.source} | ${
+                  type === 'news' ? item.date.slice(0, 10) : item.date.slice(0, 4)
+                }`}</div>
               </Link>
             </div>
           ))
