@@ -19,6 +19,8 @@ interface NewsPaperSectionProps {
 
 export default function NewsPaperSection({ news, papers }: NewsPaperSectionProps) {
   const [activeTab, setActiveTab] = useState<'news' | 'papers'>('news');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   const handleIncrementViewCount = (item: NewsPaperWithCategory) => {
     incrementNewsViewCount(item.id);
@@ -61,6 +63,34 @@ export default function NewsPaperSection({ news, papers }: NewsPaperSectionProps
     );
   };
 
+  const getCurrentItems = (items: NewsPaperWithCategory[]) => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return items.slice(startIndex, endIndex);
+  };
+
+  const getTotalPages = (items: NewsPaperWithCategory[]) => {
+    return Math.ceil(items.length / itemsPerPage);
+  };
+
+  const renderPagination = (totalPages: number) => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => setCurrentPage(i)}
+          className={`px-3 py-1 mx-1 rounded ${
+            currentPage === i ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          {i}
+        </button>,
+      );
+    }
+    return pages;
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex border-b border-gray-200">
@@ -68,7 +98,10 @@ export default function NewsPaperSection({ news, papers }: NewsPaperSectionProps
           className={`py-2 px-4 font-medium ${
             activeTab === 'news' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'
           }`}
-          onClick={() => setActiveTab('news')}
+          onClick={() => {
+            setActiveTab('news');
+            setCurrentPage(1);
+          }}
         >
           <div className="flex items-center">
             <Newspaper className="h-5 w-5 mr-2" />
@@ -79,7 +112,10 @@ export default function NewsPaperSection({ news, papers }: NewsPaperSectionProps
           className={`py-2 px-4 font-medium ${
             activeTab === 'papers' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'
           }`}
-          onClick={() => setActiveTab('papers')}
+          onClick={() => {
+            setActiveTab('papers');
+            setCurrentPage(1);
+          }}
         >
           <div className="flex items-center">
             <BookOpen className="h-5 w-5 mr-2" />
@@ -91,7 +127,10 @@ export default function NewsPaperSection({ news, papers }: NewsPaperSectionProps
       {activeTab === 'news' && (
         <div className="space-y-6">
           {news.length > 0 ? (
-            news.map(renderNewsPaperCard)
+            <>
+              {getCurrentItems(news).map(renderNewsPaperCard)}
+              <div className="flex justify-center mt-8">{renderPagination(getTotalPages(news))}</div>
+            </>
           ) : (
             <div className="bg-white p-6 rounded-lg shadow-md text-center">
               <p className="text-gray-500">검색 결과가 없습니다.</p>
@@ -103,7 +142,10 @@ export default function NewsPaperSection({ news, papers }: NewsPaperSectionProps
       {activeTab === 'papers' && (
         <div className="space-y-6">
           {papers.length > 0 ? (
-            papers.map(renderNewsPaperCard)
+            <>
+              {getCurrentItems(papers).map(renderNewsPaperCard)}
+              <div className="flex justify-center mt-8">{renderPagination(getTotalPages(papers))}</div>
+            </>
           ) : (
             <div className="bg-white p-6 rounded-lg shadow-md text-center">
               <p className="text-gray-500">검색 결과가 없습니다.</p>
