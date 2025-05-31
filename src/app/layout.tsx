@@ -9,7 +9,7 @@ import { getAuthStatus } from '@/utils/auth';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: '캡디지몬',
+  title: 'NewSeeker',
   description: 'AI 기반 산업별 맞춤형 뉴스 브리핑 시스템',
   icons: {
     icon: '/png/capdisimon.png',

@@ -11,7 +11,7 @@ interface Props {
 export default function RelatedItemsSection({ items, type }: Props) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">AI 추천 관련 {type === 'news' ? '기사' : '논문'}</h2>
+      <h2 className="text-xl font-semibold mb-4">관련 {type === 'news' ? '기사' : '논문'} 추천</h2>
       <div className="space-y-4">
         {items.length > 0 ? (
           items.map((item) => (
