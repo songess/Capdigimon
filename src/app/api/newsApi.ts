@@ -344,9 +344,9 @@ const mockCategories: Category[] = [
       { id: 'VIVO', name: '비보' },
       { id: 'OPPO', name: 'OPPO' },
       { id: 'HUAWEI', name: '화웨이' },
-      { id: 'SNAPDRAGON', name: '스냅드래곤' },
-      { id: 'DIMENSITY', name: '디멘시티' },
-      { id: 'KIRIN', name: '키린' },
+      // { id: 'SNAPDRAGON', name: '스냅드래곤' },
+      // { id: 'DIMENSITY', name: '디멘시티' },
+      // { id: 'KIRIN', name: '키린' },
     ],
   },
 ];
