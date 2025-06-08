@@ -4,8 +4,8 @@ import { SCROLL_CONTENT_LIST } from '@/components/LandingPage/ScrollContent';
 import BackgroundContent from '@/components/LandingPage/BackgroundContent';
 
 // SSG
-export const dynamic = 'force-static';
-export const revalidate = 3600;
+// export const dynamic = 'force-static';
+// export const revalidate = 3600;
 
 export default function Home() {
   return (
