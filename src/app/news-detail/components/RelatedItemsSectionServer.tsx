@@ -7,7 +7,7 @@ interface Props {
 }
 
 export default async function RelatedItemsSectionServer({ id, type }: Props) {
-  const related = await fetchRelatedNews(Number(id), type);
+  const related = await fetchRelatedNews(Number(id), 'all');
   const renderRelated = related.results.filter((item) => item.sim_score !== 1).slice(0, 3);
   return <RelatedItemsSection items={renderRelated} type={type} />;
 }

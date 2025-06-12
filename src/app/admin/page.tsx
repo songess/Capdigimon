@@ -531,8 +531,9 @@ export default function Admin() {
                     }
                   }}
                   // disabled={schedulerState?.state !== 'RUNNING'}
-                  disabled={true}
-                  className="disabled:opacity-50 disabled:cursor-not-allowed"
+                  // disabled={true}
+                  // className="disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="cursor-pointer"
                 >
                   <Pause className="mr-2 h-5 w-5" />
                   일시 중지
@@ -552,8 +553,9 @@ export default function Admin() {
                     }
                   }}
                   // disabled={schedulerState?.state === 'RUNNING'}
-                  disabled={true}
-                  className="disabled:opacity-50 disabled:cursor-not-allowed"
+                  // disabled={true}
+                  // className="disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="cursor-pointer"
                 >
                   <Play className="mr-2 h-5 w-5" />
                   재개

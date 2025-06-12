@@ -75,7 +75,25 @@ export default function NewsPaperSection({ news, papers }: NewsPaperSectionProps
 
   const renderPagination = (totalPages: number) => {
     const pages = [];
-    for (let i = 1; i <= totalPages; i++) {
+    const currentGroup = Math.ceil(currentPage / 10);
+    const startPage = (currentGroup - 1) * 10 + 1;
+    const endPage = Math.min(currentGroup * 10, totalPages);
+
+    // 이전 그룹 버튼
+    if (currentGroup > 1) {
+      pages.push(
+        <button
+          key="prev"
+          onClick={() => setCurrentPage(startPage - 1)}
+          className="px-3 py-1 mx-1 rounded bg-white text-gray-700 hover:bg-gray-100"
+        >
+          &lt;
+        </button>,
+      );
+    }
+
+    // 페이지 버튼들
+    for (let i = startPage; i <= endPage; i++) {
       pages.push(
         <button
           key={i}
@@ -88,6 +106,20 @@ export default function NewsPaperSection({ news, papers }: NewsPaperSectionProps
         </button>,
       );
     }
+
+    // 다음 그룹 버튼
+    if (currentGroup < Math.ceil(totalPages / 10)) {
+      pages.push(
+        <button
+          key="next"
+          onClick={() => setCurrentPage(endPage + 1)}
+          className="px-3 py-1 mx-1 rounded bg-white text-gray-700 hover:bg-gray-100"
+        >
+          &gt;
+        </button>,
+      );
+    }
+
     return pages;
   };
 
