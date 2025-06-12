@@ -46,16 +46,13 @@ export default function BriefingSettings() {
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [emailNotification, setEmailNotification] = useState<boolean>(true);
-  const [kakaoNotification, setKakaoNotification] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<'news' | 'paper'>('news');
   const [briefingFrequency, setBriefingFrequency] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
   const [selectedTime, setSelectedTime] = useState<string>('09:00');
   const [selectedDays, setSelectedDays] = useState<string>('월');
   const [selectedDate, setSelectedDate] = useState<number>(1);
   const [email, setEmail] = useState<string>('please fill email');
-  const [kakao, setKakao] = useState<string>('아직 어떤 방식으로 연동하는지 모름');
   const [isEditingEmail, setIsEditingEmail] = useState<boolean>(false);
-  const [isEditingKakao, setIsEditingKakao] = useState<boolean>(false);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -77,7 +74,6 @@ export default function BriefingSettings() {
         const alarmData = await fetchMyAlarm();
         console.log('alarmData', alarmData);
         setEmailNotification(alarmData.email_on);
-        setKakaoNotification(alarmData.kakao_on);
         setBriefingFrequency(alarmData.frequency);
         setSelectedTime(alarmData.receive_time);
         setEmail(alarmData.email || 'please fill email');
@@ -174,19 +170,6 @@ export default function BriefingSettings() {
     }
   };
 
-  // const handleSaveSettings = () => {
-  //   // 실제로는 API를 통해 서버에 저장
-  //   toast.success('설정이 저장되었습니다.', {
-  //     icon: '👍',
-  //     duration: 3000,
-  //     style: {
-  //       borderRadius: '10px',
-  //       background: '#333',
-  //       color: '#fff',
-  //     },
-  //   });
-  // };
-
   // 카테고리 필터링 함수
   const getFilteredCategories = () => {
     if (selectedTab === 'news') {
@@ -207,14 +190,14 @@ export default function BriefingSettings() {
     }
   };
 
-  const handleKakaoToggle = async () => {
+  const handleEmailChange = async () => {
     try {
-      // await patchAlarmKakaoOn();
-      setKakaoNotification(!kakaoNotification);
-      toast.success('카카오톡 알림 설정이 변경되었습니다.');
+      await patchChangeEmail(email);
+      setIsEditingEmail(false);
+      toast.success('이메일이 변경되었습니다.');
     } catch (error) {
-      console.error('카카오톡 알림 설정 변경 중 오류 발생:', error);
-      toast.error('카카오톡 알림 설정 변경 중 오류가 발생했습니다.');
+      console.error('이메일 변경 중 오류 발생:', error);
+      toast.error('이메일 변경 중 오류가 발생했습니다.');
     }
   };
 
@@ -260,23 +243,6 @@ export default function BriefingSettings() {
       console.error('시간 변경 중 오류 발생:', error);
       toast.error('시간 변경 중 오류가 발생했습니다.');
     }
-  };
-
-  const handleEmailChange = async () => {
-    try {
-      await patchChangeEmail(email);
-      setIsEditingEmail(false);
-      toast.success('이메일이 변경되었습니다.');
-    } catch (error) {
-      console.error('이메일 변경 중 오류 발생:', error);
-      toast.error('이메일 변경 중 오류가 발생했습니다.');
-    }
-  };
-
-  const handleKakaoChange = () => {
-    // TODO: 카카오톡 변경 API 호출
-    setIsEditingKakao(false);
-    toast.success('카카오톡이 변경되었습니다.');
   };
 
   return (
@@ -425,39 +391,29 @@ export default function BriefingSettings() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <MessageSquare className="h-5 w-5 text-gray-500 mr-2" />
-                  <span>카카오톡 알림(TODO)</span>
+                  <span>Slack 알림 설정</span>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={kakaoNotification}
-                    onChange={handleKakaoToggle}
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
               </div>
 
-              {kakaoNotification && (
-                <div className="ml-7 transition-all duration-300 ease-in-out">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="카카오톡 주소"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={kakao}
-                      onChange={(e) => setKakao(e.target.value)}
-                      disabled={!isEditingKakao}
-                    />
-                    <Button
-                      onClick={() => (isEditingKakao ? handleKakaoChange() : setIsEditingKakao(true))}
-                      className="whitespace-nowrap"
-                    >
-                      {isEditingKakao ? '저장' : '변경'}
-                    </Button>
-                  </div>
+              <div className="ml-7 transition-all duration-300 ease-in-out">
+                <div className="flex flex-col gap-4">
+                  <p className="text-sm text-gray-600">Newseeker Slack 팀에 참여하여 브리핑을 받아보세요.</p>
+                  <Button
+                    onClick={() =>
+                      window.open(
+                        'https://join.slack.com/t/newseeker/shared_invite/zt-361rfskgm-xhKyTeKH26FnWcLNS6CdhQ',
+                        '_blank',
+                      )
+                    }
+                    className="flex items-center gap-2 bg-[#4A154B] hover:bg-[#3a1039] text-white cursor-pointer"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523-2.521 2.528 2.528 0 0 1 2.523-2.52 2.528 2.528 0 0 1 2.521 2.52V2.522A2.528 2.528 0 0 1 17.688 0a2.528 2.528 0 0 1-2.521 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.521 2.522A2.528 2.528 0 0 1 15.165 24a2.528 2.528 0 0 1-2.522-2.522v-2.522h2.522zM15.165 17.688a2.528 2.528 0 0 1-2.522 2.523 2.528 2.528 0 0 1-2.521-2.523v-6.313a2.528 2.528 0 0 1 2.521-2.521 2.528 2.528 0 0 1 2.522 2.521v6.313z" />
+                    </svg>
+                    Newseeker Slack 팀 참여하기
+                  </Button>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
@@ -556,16 +512,6 @@ export default function BriefingSettings() {
               </div>
             )}
           </div>
-
-          {/* 저장 버튼 */}
-          {/* <div className="flex justify-end">
-            <Button
-              className="px-6 py-6 text-base transition-all duration-200 hover:shadow-lg"
-              onClick={handleSaveSettings}
-            >
-              설정 저장
-            </Button>
-          </div> */}
         </div>
       </div>
     </div>
