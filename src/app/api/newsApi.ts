@@ -351,8 +351,57 @@ const mockCategories: Category[] = [
   },
 ];
 
+const mockCategoriesForDashboard: Category[] = [
+  {
+    id: 'COMPUTER_ENGINEERING',
+    name: '컴퓨터 공학',
+    subcategories: [
+      { id: 'COMPUTER_ARCHITECTURE', name: '컴퓨터 아키텍처' },
+      { id: 'EMBEDDED_SYSTEMS', name: '임베디드 시스템' },
+      { id: 'VLSI_DESIGN', name: 'VLSI 설계' },
+      { id: 'OPERATING_SYSTEMS', name: '운영체제' },
+      { id: 'COMPUTER_NETWORKS', name: '컴퓨터 네트워크' },
+      { id: 'SOFTWARE_ENGINEERING', name: '소프트웨어 공학' },
+      { id: 'ARTIFICIAL_INTELLIGENCE_ROBOTICS', name: '인공지능/로보틱스' },
+      { id: 'DATA_SCIENCE_ANALYTICS', name: '데이터 사이언스' },
+      { id: 'SECURITY_RELIABILITY', name: '정보보안' },
+    ],
+  },
+  {
+    id: 'ELECTRICAL_ELECTRONIC_ENGINEERING',
+    name: '전기/전자 공학',
+    subcategories: [
+      { id: 'POWER_SYSTEMS', name: '전력 시스템' },
+      { id: 'ELECTRONICS_ENGINEERING', name: '전자공학' },
+      { id: 'COMMUNICATION_SYSTEMS', name: '통신 시스템' },
+      { id: 'CONTROL_SYSTEMS', name: '제어 시스템' },
+      { id: 'SIGNAL_PROCESSING', name: '신호 처리' },
+      { id: 'MICROELECTRONICS_NANOTECHNOLOGY', name: '마이크로일렉트로닉스/나노기술' },
+      { id: 'ELECTROMAGNETICS_MICROWAVES', name: '전자기학/마이크로파' },
+      { id: 'INSTRUMENTATION_SENSING', name: '계측/센싱' },
+      { id: 'OPTICS_PHOTONICS', name: '광학/포토닉스' },
+    ],
+  },
+  {
+    id: 'IT_CATEGORY',
+    name: 'IT 기업',
+    subcategories: [
+      { id: 'QUALCOMM', name: '퀄컴' },
+      { id: 'MEDIATEK', name: '미디어텍' },
+      { id: 'APPLE', name: '애플' },
+      { id: 'XIAOMI', name: '샤오미' },
+      { id: 'VIVO', name: '비보' },
+      { id: 'OPPO', name: 'OPPO' },
+      { id: 'HUAWEI', name: '화웨이' },
+      { id: 'SNAPDRAGON', name: '스냅드래곤' },
+      { id: 'DIMENSITY', name: '디멘시티' },
+      { id: 'KIRIN', name: '키린' },
+    ],
+  },
+];
+
 export function subCategoriesEngToKor(engId: string): string {
-  for (const category of mockCategories) {
+  for (const category of mockCategoriesForDashboard) {
     const subcategory = category.subcategories?.find((sub) => sub.id === engId);
     if (subcategory) {
       return subcategory.name;
