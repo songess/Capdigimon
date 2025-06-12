@@ -29,17 +29,19 @@ export default function TrendSection({ trends }: TrendSectionProps) {
   const getChartData = () => {
     const sourceData = trends;
 
-    return sourceData.reduce((acc: Array<{ date: string; [key: string]: number | string }>, curr) => {
-      const existingDate = acc.find((item) => item.date === curr.record_date);
-      if (existingDate) {
-        existingDate[curr.group_category] = curr.hits_sum;
-      } else {
-        const newItem: { date: string; [key: string]: number | string } = { date: curr.record_date };
-        newItem[curr.group_category] = curr.hits_sum;
-        acc.push(newItem);
-      }
-      return acc;
-    }, []);
+    return sourceData
+      .reduce((acc: Array<{ date: string; [key: string]: number | string }>, curr) => {
+        const existingDate = acc.find((item) => item.date === curr.record_date);
+        if (existingDate) {
+          existingDate[curr.group_category] = curr.hits_sum;
+        } else {
+          const newItem: { date: string; [key: string]: number | string } = { date: curr.record_date };
+          newItem[curr.group_category] = curr.hits_sum;
+          acc.push(newItem);
+        }
+        return acc;
+      }, [])
+      .reverse();
   };
 
   const chartData = getChartData();
@@ -172,7 +174,6 @@ export default function TrendSection({ trends }: TrendSectionProps) {
           트렌드 분석
         </h2>
         <div className="flex items-center space-x-2">
-
           <div className="relative group">
             <button className="p-1 rounded-md hover:bg-gray-100">
               <BarChart2 className="h-5 w-5 text-gray-500" />

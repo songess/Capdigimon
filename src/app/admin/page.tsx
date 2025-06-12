@@ -53,8 +53,8 @@ export default function Admin() {
         const schedulerStateData = await fetchSchedulerState();
 
         setStats(statsData);
-        setCrawlingHistoryNews(crawlingHistoryNewsData.slice(0, 3));
-        setCrawlingHistoryPaper(crawlingHistoryPaperData.slice(0, 3));
+        setCrawlingHistoryNews(crawlingHistoryNewsData.slice(0, 3).reverse());
+        setCrawlingHistoryPaper(crawlingHistoryPaperData.slice(0, 3).reverse());
         setSchedulerState(schedulerStateData);
 
         // 뉴스 및 논문 데이터 가져오기
