@@ -23,7 +23,7 @@ export default function RelatedItemsSection({ items, type }: Props) {
                 <h3 className="font-medium text-gray-900 hover:text-blue-600">{item.title}</h3>
                 <p className="text-sm text-gray-600 mt-1 line-clamp-2">{item.summary}</p>
                 <div className="text-xs text-gray-500 mt-1">{`${item.source} | ${
-                  type === 'news' ? item.date.slice(0, 10) : item.date.slice(0, 4)
+                  item.type === 'news' ? item.date.slice(0, 10) : item.date.slice(0, 4)
                 }`}</div>
               </Link>
             </div>
